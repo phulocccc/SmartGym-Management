@@ -1,0 +1,45 @@
+﻿@model SmartGymManagement.Models.Member
+
+@{
+    ViewData["Title"] = "Deactivate Member";
+}
+
+<h1>Deactivate Member</h1>
+
+<h4>Are you sure you want to deactivate this member?</h4>
+
+<p class="text-warning">
+    This member account will be marked as inactive. The historical data will remain.
+</p>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Full Name</th>
+        <td>@Model.User?.FullName</td>
+    </tr>
+
+    <tr>
+        <th>Email</th>
+        <td>@Model.User?.Email</td>
+    </tr>
+
+    <tr>
+        <th>Phone</th>
+        <td>@Model.User?.PhoneNumber</td>
+    </tr>
+
+    <tr>
+        <th>Status</th>
+        <td>@Model.Status</td>
+    </tr>
+</table>
+
+<form asp-area="Admin" asp-controller="Members" asp-action="Delete" method="post">
+    <input type="hidden" asp-for="MemberId" />
+
+    <button type="submit" class="btn btn-danger">Deactivate</button>
+
+    <a asp-area="Admin" asp-controller="Members" asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
+</form>

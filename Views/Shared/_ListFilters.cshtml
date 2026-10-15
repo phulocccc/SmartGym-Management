@@ -1,0 +1,14 @@
+<form method="get" class="d-flex flex-wrap gap-2 mb-3">
+ <input name="search" value="@Context.Request.Query["search"]" class="form-control w-auto" placeholder="Tìm kiếm" maxlength="100" aria-label="Tìm kiếm" />
+ @if (ViewData["StatusType"] is Type enumType)
+ {
+  <select name="status" class="form-select w-auto" aria-label="Trạng thái">
+   <option value="">Tất cả trạng thái</option>
+   @foreach (var status in Enum.GetNames(enumType))
+   {
+    <option value="@status" selected="@(Context.Request.Query["status"].ToString() == status)">@status</option>
+   }
+  </select>
+ }
+ <button type="submit" class="btn btn-primary">Lọc</button>
+</form>

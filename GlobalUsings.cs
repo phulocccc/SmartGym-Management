@@ -1,0 +1,1 @@
+global using SmartGymManagement.Services;

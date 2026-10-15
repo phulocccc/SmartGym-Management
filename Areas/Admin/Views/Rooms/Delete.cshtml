@@ -1,0 +1,41 @@
+﻿@model SmartGymManagement.Models.Room
+
+@{
+    ViewData["Title"] = "Deactivate Room";
+}
+
+<h1>Deactivate Room</h1>
+
+<h4>Are you sure you want to deactivate this room?</h4>
+
+<p class="text-warning">
+    This room will not be available for new class schedules, but old class history will remain.
+</p>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+<table class="table table-bordered">
+    <tr>
+        <th>Room Name</th>
+        <td>@Model.RoomName</td>
+    </tr>
+
+    <tr>
+        <th>Capacity</th>
+        <td>@Model.Capacity</td>
+    </tr>
+
+    <tr>
+        <th>Active</th>
+        <td>@Model.IsActive</td>
+    </tr>
+</table>
+
+<form asp-area="Admin" asp-controller="Rooms" asp-action="Delete" method="post">
+    <input type="hidden" asp-for="RoomId" />
+
+    <button type="submit" class="btn btn-danger">Deactivate</button>
+
+    <a asp-area="Admin" asp-controller="Rooms" asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
+</form>

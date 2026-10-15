@@ -1,0 +1,8 @@
+@model SmartGymManagement.Models.MembershipPackage
+@{ ViewData["Title"] = "Ngừng cung cấp gói tập"; }
+<h1>Ngừng cung cấp gói tập</h1>
+<p>Ngừng cung cấp <strong>@Model.PackageName</strong>? Các lần mua và lịch sử thanh toán được giữ lại.</p>
+<form asp-action="Delete" asp-route-id="@Model.PackageId" method="post">
+ <button class="btn btn-danger" type="submit">Ngừng cung cấp</button>
+ <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</form>

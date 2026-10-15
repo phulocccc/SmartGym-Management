@@ -1,0 +1,84 @@
+@model IEnumerable<SmartGymManagement.Models.Booking>
+
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<h1>My Bookings</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<p>
+    <a asp-controller="MemberBookings" asp-action="AvailableClasses" class="btn btn-primary">
+        Book New Class
+    </a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Class</th>
+            <th>Trainer</th>
+            <th>Room</th>
+            <th>Class Time</th>
+            <th>Booking Date</th>
+            <th>Status</th><th>QR</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+@foreach (var item in Model)
+{
+        <tr>
+            <td>@item.ClassSchedule?.ClassName</td>
+            <td>@item.ClassSchedule?.Trainer?.FullName</td>
+            <td>@item.ClassSchedule?.Room?.RoomName</td>
+            <td>
+                @item.ClassSchedule?.StartTime.ToString("dd/MM/yyyy HH:mm")
+                -
+                @item.ClassSchedule?.EndTime.ToString("HH:mm")
+            </td>
+            <td>@item.BookingDate.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>@item.Status</td>
+            <td>
+             @if (item.Status == SmartGymManagement.Enums.BookingStatus.Booked && item.ClassSchedule != null &&
+                 SmartGymManagement.Services.AttendanceWindowRules.AllowsAttendance(item.ClassSchedule.Status) &&
+                 item.ClassSchedule.EndTime.AddHours(2) >= SmartGymManagement.Services.GymClock.Now)
+             { <a asp-action="Qr" asp-route-bookingId="@item.BookingId">QR điểm danh</a> }
+            </td>
+            <td>
+                @if (
+                    item.Status == SmartGymManagement.Enums.BookingStatus.Booked &&
+                    item.ClassSchedule != null &&
+                    item.ClassSchedule.StartTime > DateTime.Now
+                )
+                {
+                    <form asp-controller="MemberBookings" asp-action="Cancel" method="post">
+                        <input type="hidden" name="bookingId" value="@item.BookingId" />
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            Cancel
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <span class="text-muted">No action</span>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

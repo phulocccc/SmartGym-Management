@@ -1,0 +1,404 @@
+<style>
+    .smart-chat-button {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        border: none;
+        background: #0d6efd;
+        color: white;
+        font-size: 28px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+        z-index: 9999;
+        cursor: pointer;
+    }
+
+    .smart-chat-button:hover {
+        background: #0b5ed7;
+    }
+
+    .smart-chat-panel {
+        position: fixed;
+        bottom: 100px;
+        right: 24px;
+        width: 390px;
+        max-width: calc(100vw - 30px);
+        height: 560px;
+        max-height: calc(100vh - 130px);
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);
+        border-radius: 16px;
+        overflow: hidden;
+        z-index: 9999;
+        display: none;
+        flex-direction: column;
+    }
+
+    .smart-chat-header {
+        background: #0d6efd;
+        color: white;
+        padding: 14px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .smart-chat-title {
+        font-weight: 800;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .smart-chat-subtitle {
+        margin: 2px 0 0;
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+
+    .smart-chat-close {
+        border: none;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .smart-chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px;
+        background: #f8f9fa;
+    }
+
+    .smart-chat-message {
+        display: flex;
+        margin-bottom: 12px;
+    }
+
+    .smart-chat-message.user {
+        justify-content: flex-end;
+    }
+
+    .smart-chat-message.bot {
+        justify-content: flex-start;
+    }
+
+    .smart-chat-bubble {
+        max-width: 82%;
+        padding: 10px 12px;
+        border-radius: 14px;
+        line-height: 1.45;
+        white-space: pre-line;
+        font-size: 0.94rem;
+    }
+
+    .smart-chat-message.user .smart-chat-bubble {
+        background: #0d6efd;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .smart-chat-message.bot .smart-chat-bubble {
+        background: #ffffff;
+        color: #212529;
+        border: 1px solid #dee2e6;
+        border-bottom-left-radius: 4px;
+    }
+
+    .smart-chat-time {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.72rem;
+        opacity: 0.7;
+    }
+
+    .smart-chat-quick {
+        padding: 10px 12px;
+        background: #ffffff;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .smart-chat-quick button {
+        margin: 3px;
+    }
+
+    .smart-chat-footer {
+        padding: 12px;
+        background: #ffffff;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .smart-chat-error {
+        min-height: 18px;
+        font-size: 0.82rem;
+    }
+
+    .smart-chat-thinking {
+        display: none;
+        color: #6c757d;
+        font-size: 0.88rem;
+        margin-bottom: 10px;
+    }
+
+    @@media (max-width: 576px) {
+        .smart-chat-panel {
+            right: 12px;
+            bottom: 88px;
+            width: calc(100vw - 24px);
+            height: 530px;
+        }
+
+        .smart-chat-button {
+            right: 18px;
+            bottom: 18px;
+        }
+    }
+</style>
+
+<button id="smartChatButton"
+        class="smart-chat-button"
+        type="button"
+        title="Trợ lý Smart Gym">
+    💬
+</button>
+
+<div id="smartChatPanel" class="smart-chat-panel">
+
+    <div class="smart-chat-header">
+        <div>
+            <p class="smart-chat-title">
+                Trợ lý Smart Gym
+            </p>
+
+            <p class="smart-chat-subtitle">
+                Gói tập, lịch lớp, BMI và kiến thức fitness
+            </p>
+        </div>
+
+        <button id="smartChatClose"
+                class="smart-chat-close"
+                type="button">
+            ×
+        </button>
+    </div>
+
+    <div id="smartChatBody" class="smart-chat-body">
+
+        <div class="smart-chat-message bot">
+            <div class="smart-chat-bubble">
+                Xin chào! Tôi giúp bạn xem gói tập, lịch lớp, điểm danh, BMI, TDEE, macros và kiến thức fitness.
+            </div>
+        </div>
+
+        <div id="smartChatThinking" class="smart-chat-thinking">
+            Trợ lý Smart Gym is thinking...
+        </div>
+
+    </div>
+
+    <div class="smart-chat-quick">
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm smart-chat-suggestion"
+                data-question="Gói tập của tôi còn bao nhiêu ngày?">
+            Gói tập
+        </button>
+
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm smart-chat-suggestion"
+                data-question="Lớp sắp tới của tôi là gì?">
+            Classes
+        </button>
+
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm smart-chat-suggestion"
+                data-question="BMI mới nhất của tôi là bao nhiêu?">
+            BMI
+        </button>
+
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm smart-chat-suggestion"
+                data-question="Tôi nên uống bao nhiêu nước?">
+            Water
+        </button>
+
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm smart-chat-suggestion"
+                data-question="Làm sao để giảm mỡ?">
+            Giảm mỡ
+        </button>
+
+        <button type="button"
+                class="btn btn-outline-secondary btn-sm smart-chat-suggestion"
+                data-question="Làm sao để tăng cơ?">
+            Tăng cơ
+        </button>
+    </div>
+
+    <div class="smart-chat-footer">
+
+        <form id="smartChatForm">
+            @Html.AntiForgeryToken()
+
+            <div class="input-group">
+                <input id="smartChatInput"
+                       name="message"
+                       class="form-control"
+                       maxlength="1000"
+                       autocomplete="off"
+                       placeholder="Nhập câu hỏi..." />
+
+                <button id="smartChatSend"
+                        type="submit"
+                        class="btn btn-primary">Gửi</button>
+            </div>
+
+            <div id="smartChatError"
+                 class="text-danger smart-chat-error mt-1">
+            </div>
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatButton = document.getElementById("smartChatButton");
+        const chatPanel = document.getElementById("smartChatPanel");
+        const closeButton = document.getElementById("smartChatClose");
+        const form = document.getElementById("smartChatForm");
+        const input = document.getElementById("smartChatInput");
+        const sendButton = document.getElementById("smartChatSend");
+        const body = document.getElementById("smartChatBody");
+        const thinking = document.getElementById("smartChatThinking");
+        const errorDiv = document.getElementById("smartChatError");
+
+        function openChat() {
+            chatPanel.style.display = "flex";
+            input.focus();
+            scrollToBottom();
+        }
+
+        function closeChat() {
+            chatPanel.style.display = "none";
+        }
+
+        function scrollToBottom() {
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function addMessage(role, text, createdAt = "") {
+            const row = document.createElement("div");
+            row.className = "smart-chat-message " + role;
+
+            const bubble = document.createElement("div");
+            bubble.className = "smart-chat-bubble";
+            bubble.innerHTML = escapeHtml(text).replace(/\n/g, "<br>");
+
+            if (createdAt) {
+                const time = document.createElement("span");
+                time.className = "smart-chat-time";
+                time.textContent = createdAt;
+                bubble.appendChild(time);
+            }
+
+            row.appendChild(bubble);
+
+            body.insertBefore(row, thinking);
+
+            scrollToBottom();
+        }
+
+        async function sendMessage(rawMessage) {
+            if (sendButton.disabled) return;
+            const message = rawMessage.trim();
+
+            if (!message) {
+                errorDiv.textContent = "Vui lòng nhập câu hỏi.";
+                return;
+            }
+
+            errorDiv.textContent = "";
+
+            addMessage("user", message);
+
+            input.value = "";
+            sendButton.disabled = true;
+            thinking.style.display = "block";
+            scrollToBottom();
+
+            try {
+                const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                const requestBody = new URLSearchParams();
+                requestBody.append("message", message);
+                requestBody.append("__RequestVerificationToken", token);
+
+                const response = await fetch('@Url.Action("Ask", "MemberChatbot", new { area = "" })', {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: requestBody.toString()
+                });
+
+                if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) {
+                    throw new Error(response.status === 429 ? "Bạn gửi câu hỏi quá nhanh. Vui lòng chờ một phút." : "Phiên đăng nhập đã hết hoặc dịch vụ chưa sẵn sàng.");
+                }
+                const data = await response.json();
+
+                if (!data.success) {
+                    errorDiv.textContent = data.message ?? "Không thể nhận phản hồi.";
+                    return;
+                }
+
+                addMessage("bot", data.reply, data.createdAt);
+            }
+            catch (error) {
+                errorDiv.textContent = error.message || "Không thể kết nối trợ lý. Vui lòng thử lại.";
+            }
+            finally {
+                thinking.style.display = "none";
+                sendButton.disabled = false;
+                input.focus();
+                scrollToBottom();
+            }
+        }
+
+        chatButton.addEventListener("click", function () {
+            if (chatPanel.style.display === "flex") {
+                closeChat();
+            }
+            else {
+                openChat();
+            }
+        });
+
+        closeButton.addEventListener("click", closeChat);
+
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+            sendMessage(input.value);
+        });
+
+        document.querySelectorAll(".smart-chat-suggestion")
+            .forEach(button => {
+                button.addEventListener("click", function () {
+                    openChat();
+                    sendMessage(this.dataset.question);
+                });
+            });
+    });
+</script>

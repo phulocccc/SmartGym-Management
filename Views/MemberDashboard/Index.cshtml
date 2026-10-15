@@ -1,0 +1,225 @@
+﻿@model SmartGymManagement.ViewModels.MemberDashboardViewModel
+
+@{
+    ViewData["Title"] = "Member Dashboard";
+}
+
+<h1>Member Dashboard</h1>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                My Profile
+            </div>
+
+            <div class="card-body">
+                <p>
+                    <strong>Full Name:</strong>
+                    @Model.FullName
+                </p>
+
+                <p>
+                    <strong>Email:</strong>
+                    @Model.Email
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    @Model.PhoneNumber
+                </p>
+
+                <p>
+                    <strong>Member Status:</strong>
+                    @Model.MemberStatus
+                </p>
+
+                <p>
+                    <strong>Join Date:</strong>
+                    @Model.JoinDate.ToString("dd/MM/yyyy")
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Current Membership
+            </div>
+
+            <div class="card-body">
+                @if (Model.HasActiveMembership)
+                {
+                    <p>
+                        <strong>Package:</strong>
+                        @Model.PackageName
+                    </p>
+
+                    <p>
+                        <strong>Start Date:</strong>
+                        @Model.MembershipStartDate?.ToString("dd/MM/yyyy")
+                    </p>
+
+                    <p>
+                        <strong>End Date:</strong>
+                        @Model.MembershipEndDate?.ToString("dd/MM/yyyy")
+                    </p>
+
+                    <p>
+                        <strong>Remaining Days:</strong>
+                        <span class="badge bg-success">
+                            @Model.RemainingDays days
+                        </span>
+                    </p>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        You do not have an active membership.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>@Model.TotalBookings</h3>
+                <p>Total Bookings</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>@Model.UpcomingBookingsCount</h3>
+                <p>Upcoming</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>@Model.AttendedCount</h3>
+                <p>Attended</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>@Model.CancelledCount</h3>
+                <p>Cancelled</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <a asp-controller="MemberBookings"
+       asp-action="AvailableClasses"
+       class="btn btn-primary">
+        Book New Class
+    </a>
+
+    <a asp-controller="MemberBookings"
+       asp-action="MyBookings"
+       class="btn btn-secondary">
+        View My Bookings
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Upcoming Bookings
+    </div>
+
+    <div class="card-body">
+        @if (Model.UpcomingBookings.Any())
+        {
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Trainer</th>
+                        <th>Room</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model.UpcomingBookings)
+                    {
+                        <tr>
+                            <td>@item.ClassName</td>
+                            <td>@item.TrainerName</td>
+                            <td>@item.RoomName</td>
+                            <td>
+                                @item.StartTime.ToString("dd/MM/yyyy HH:mm")
+                                -
+                                @item.EndTime.ToString("HH:mm")
+                            </td>
+                            <td>@item.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">
+                You do not have any upcoming bookings.
+            </p>
+        }
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Recent Attendances
+    </div>
+
+    <div class="card-body">
+        @if (Model.RecentAttendances.Any())
+        {
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Trainer</th>
+                        <th>Room</th>
+                        <th>Check-in Time</th>
+                        <th>Method</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model.RecentAttendances)
+                    {
+                        <tr>
+                            <td>@item.ClassName</td>
+                            <td>@item.TrainerName</td>
+                            <td>@item.RoomName</td>
+                            <td>@item.CheckInTime.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@item.Method</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">
+                You do not have any attendance records yet.
+            </p>
+        }
+    </div>
+</div>

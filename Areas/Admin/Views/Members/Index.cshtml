@@ -1,0 +1,58 @@
+@model IEnumerable<SmartGymManagement.Models.Member>
+
+@{
+    ViewData["Title"] = "Members";
+}
+
+<h1>Members</h1>
+<partial name="_ListFilters" />
+@if (TempData["AccountSetupLink"] is string setupLink)
+{
+ <div class="alert alert-info">Liên kết đặt mật khẩu (chỉ chuyển cho hội viên qua kênh bảo mật): <a href="@setupLink">Thiết lập mật khẩu</a></div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<p>
+    <a asp-area="Admin" asp-controller="Members" asp-action="Create" class="btn btn-primary">
+        Create New Member
+    </a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Join Date</th>
+            <th>Status</th>
+            <th>Active</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+@foreach (var item in Model)
+{
+        <tr>
+            <td>@item.User?.FullName</td>
+            <td>@item.User?.Email</td>
+            <td>@item.User?.PhoneNumber</td>
+            <td>@item.JoinDate.ToString("dd/MM/yyyy")</td>
+            <td>@item.Status</td>
+            <td>@item.User?.IsActive</td>
+            <td>
+                <a asp-area="Admin" asp-controller="Members" asp-action="Edit" asp-route-id="@item.MemberId">Edit</a> |
+                <a asp-area="Admin" asp-controller="Members" asp-action="Details" asp-route-id="@item.MemberId">Details</a> |
+                <a asp-area="Admin" asp-controller="Members" asp-action="Delete" asp-route-id="@item.MemberId">Deactivate</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

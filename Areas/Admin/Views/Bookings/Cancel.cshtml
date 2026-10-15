@@ -1,0 +1,64 @@
+﻿@model SmartGymManagement.Models.Booking
+
+@{
+    ViewData["Title"] = "Cancel Booking";
+}
+
+<h1>Cancel Booking</h1>
+
+<h4>Are you sure you want to cancel this booking?</h4>
+
+<p class="text-warning">
+    This booking will be marked as Cancelled. The class slot will become available again.
+</p>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Member</th>
+        <td>@Model.Member?.User?.FullName</td>
+    </tr>
+
+    <tr>
+        <th>Email</th>
+        <td>@Model.Member?.User?.Email</td>
+    </tr>
+
+    <tr>
+        <th>Class</th>
+        <td>@Model.ClassSchedule?.ClassName</td>
+    </tr>
+
+    <tr>
+        <th>Trainer</th>
+        <td>@Model.ClassSchedule?.Trainer?.FullName</td>
+    </tr>
+
+    <tr>
+        <th>Room</th>
+        <td>@Model.ClassSchedule?.Room?.RoomName</td>
+    </tr>
+
+    <tr>
+        <th>Class Time</th>
+        <td>
+            @Model.ClassSchedule?.StartTime.ToString("dd/MM/yyyy HH:mm")
+            -
+            @Model.ClassSchedule?.EndTime.ToString("HH:mm")
+        </td>
+    </tr>
+
+    <tr>
+        <th>Status</th>
+        <td>@Model.Status</td>
+    </tr>
+</table>
+
+<form asp-area="Admin" asp-controller="Bookings" asp-action="Cancel" method="post">
+    <input type="hidden" asp-for="BookingId" />
+
+    <button type="submit" class="btn btn-danger">Cancel Booking</button>
+
+    <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="btn btn-secondary">
+        Back
+    </a>
+</form>

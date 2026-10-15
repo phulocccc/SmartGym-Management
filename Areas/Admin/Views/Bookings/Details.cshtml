@@ -1,0 +1,88 @@
+﻿@model SmartGymManagement.Models.Booking
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<h1>Booking Details</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<table class="table table-bordered">
+    <tr>
+        <th>Member</th>
+        <td>@Model.Member?.User?.FullName</td>
+    </tr>
+
+    <tr>
+        <th>Email</th>
+        <td>@Model.Member?.User?.Email</td>
+    </tr>
+
+    <tr>
+        <th>Class</th>
+        <td>@Model.ClassSchedule?.ClassName</td>
+    </tr>
+
+    <tr>
+        <th>Trainer</th>
+        <td>@Model.ClassSchedule?.Trainer?.FullName</td>
+    </tr>
+
+    <tr>
+        <th>Room</th>
+        <td>@Model.ClassSchedule?.Room?.RoomName</td>
+    </tr>
+
+    <tr>
+        <th>Start Time</th>
+        <td>@Model.ClassSchedule?.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+
+    <tr>
+        <th>End Time</th>
+        <td>@Model.ClassSchedule?.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+
+    <tr>
+        <th>Booking Date</th>
+        <td>@Model.BookingDate.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+
+    <tr>
+        <th>Status</th>
+        <td>@Model.Status</td>
+    </tr>
+
+    <tr>
+        <th>Note</th>
+        <td>@Model.Note</td>
+    </tr>
+</table>
+
+<a asp-area="Admin"
+   asp-controller="Bookings"
+   asp-action="Edit"
+   asp-route-id="@Model.BookingId"
+   class="btn btn-warning">
+    Edit
+</a>
+
+<a asp-area="Admin"
+   asp-controller="Bookings" 
+   asp-action="Index" 
+   class="btn btn-secondary">
+    Back
+</a>
+
+@if (Model.Status == SmartGymManagement.Enums.BookingStatus.Booked)
+{
+    <a asp-area="Admin" asp-controller="Bookings" asp-action="Cancel" asp-route-id="@Model.BookingId" class="btn btn-danger">
+        Cancel Booking
+    </a>
+}

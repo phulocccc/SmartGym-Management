@@ -1,0 +1,315 @@
+﻿@model SmartGymManagement.ViewModels.BMIRecordFormViewModel
+@using SmartGymManagement.Enums
+
+@{
+    ViewData["Title"] = "Fitness Assessment";
+}
+
+<h1>Fitness Assessment</h1>
+
+<p class="text-muted">
+    Enter your current body measurements and activity information.
+    The system will automatically calculate your fitness and nutrition estimates.
+</p>
+
+<form asp-controller="MemberBMI"
+      asp-action="Create"
+      method="post">
+
+    <div asp-validation-summary="ModelOnly"
+         class="alert alert-danger">
+    </div>
+
+    <!-- PERSONAL INFORMATION -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>1. Personal Information</strong>
+        </div>
+
+        <div class="card-body">
+            <p class="text-muted">
+                Age and gender are automatically taken from your member profile.
+            </p>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Age</label>
+
+                    <input class="form-control"
+                           value="@ViewBag.Age years old"
+                           readonly />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Gender</label>
+
+                    <input class="form-control"
+                           value="@ViewBag.Gender"
+                           readonly />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BASIC BODY METRICS -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>2. Basic Body Metrics</strong>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="HeightCm"
+                           class="form-label">
+                        Height (cm)
+                    </label>
+
+                    <input asp-for="HeightCm"
+                           class="form-control"
+                           type="number"
+                           step="0.01"
+                           min="100"
+                           max="250"
+                           placeholder="Example: 170" />
+
+                    <span asp-validation-for="HeightCm"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="WeightKg"
+                           class="form-label">
+                        Weight (kg)
+                    </label>
+
+                    <input asp-for="WeightKg"
+                           class="form-control"
+                           type="number"
+                           step="0.01"
+                           min="20"
+                           max="300"
+                           placeholder="Example: 65" />
+
+                    <span asp-validation-for="WeightKg"
+                          class="text-danger">
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTIVITY AND GOAL -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>3. Activity Level & Fitness Goal</strong>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ActivityLevel"
+                           class="form-label">
+                        Activity Level
+                    </label>
+
+                    <select asp-for="ActivityLevel"
+                            asp-items="Html.GetEnumSelectList<ActivityLevel>()"
+                            class="form-select">
+                    </select>
+
+                    <span asp-validation-for="ActivityLevel"
+                          class="text-danger">
+                    </span>
+
+                    <small class="text-muted">
+                        Choose the level that best represents your normal weekly activity.
+                    </small>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="FitnessGoal"
+                           class="form-label">
+                        Fitness Goal
+                    </label>
+
+                    <select asp-for="FitnessGoal"
+                            asp-items="Html.GetEnumSelectList<FitnessGoal>()"
+                            class="form-select">
+                    </select>
+
+                    <span asp-validation-for="FitnessGoal"
+                          class="text-danger">
+                    </span>
+                </div>
+            </div>
+
+            <div class="alert alert-light border">
+                <strong>Activity Level Guide</strong>
+
+                <ul class="mb-0 mt-2">
+                    <li>
+                        <strong>Sedentary:</strong>
+                        Little or no regular exercise
+                    </li>
+
+                    <li>
+                        <strong>Lightly Active:</strong>
+                        Light exercise approximately 1 to 3 days per week
+                    </li>
+
+                    <li>
+                        <strong>Moderately Active:</strong>
+                        Moderate exercise approximately 3 to 5 days per week
+                    </li>
+
+                    <li>
+                        <strong>Very Active:</strong>
+                        Hard exercise approximately 6 to 7 days per week
+                    </li>
+
+                    <li>
+                        <strong>Extra Active:</strong>
+                        Very intense training or highly physical daily activity
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADVANCED MEASUREMENTS -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>4. Advanced Body Measurements</strong>
+        </div>
+
+        <div class="card-body">
+            <div class="alert alert-info">
+                These measurements are optional.
+                Enter them only when you want the system to estimate body fat,
+                lean body mass, WHR and WHtR.
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="NeckCm"
+                           class="form-label">
+                        Neck Circumference (cm)
+                    </label>
+
+                    <input asp-for="NeckCm"
+                           class="form-control"
+                           type="number"
+                           step="0.01"
+                           min="20"
+                           max="100"
+                           placeholder="Example: 38" />
+
+                    <span asp-validation-for="NeckCm"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label asp-for="WaistCm"
+                           class="form-label">
+                        Waist Circumference (cm)
+                    </label>
+
+                    <input asp-for="WaistCm"
+                           class="form-control"
+                           type="number"
+                           step="0.01"
+                           min="30"
+                           max="250"
+                           placeholder="Example: 80" />
+
+                    <span asp-validation-for="WaistCm"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label asp-for="HipCm"
+                           class="form-label">
+                        Hip Circumference (cm)
+                    </label>
+
+                    <input asp-for="HipCm"
+                           class="form-control"
+                           type="number"
+                           step="0.01"
+                           min="30"
+                           max="250"
+                           placeholder="Example: 95" />
+
+                    <span asp-validation-for="HipCm"
+                          class="text-danger">
+                    </span>
+                </div>
+            </div>
+
+            @if (ViewBag.Gender?.ToString() == "Male")
+            {
+                <p class="text-muted mb-0">
+                    For male body fat estimation, enter Neck and Waist measurements.
+                </p>
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    For female body fat estimation, enter Neck, Waist and Hip measurements.
+                </p>
+            }
+        </div>
+    </div>
+
+    <!-- NOTE -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>5. Note</strong>
+        </div>
+
+        <div class="card-body">
+            <label asp-for="Note"
+                   class="form-label">
+                Personal Note
+            </label>
+
+            <textarea asp-for="Note"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Example: Morning measurement before breakfast"></textarea>
+
+            <span asp-validation-for="Note"
+                  class="text-danger">
+            </span>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <button type="submit"
+                class="btn btn-primary">
+            Calculate & Save Assessment
+        </button>
+
+        <a asp-controller="MemberBMI"
+           asp-action="Index"
+           class="btn btn-secondary">
+            Back
+        </a>
+    </div>
+</form>
+
+<div class="alert alert-warning">
+    <strong>Important:</strong>
+    These results are estimates for fitness tracking and educational purposes.
+    They are not a medical diagnosis or a personalized medical or dietary prescription.
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

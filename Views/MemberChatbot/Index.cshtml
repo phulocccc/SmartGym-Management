@@ -1,0 +1,555 @@
+@inject IConfiguration Configuration
+@model SmartGymManagement.ViewModels.MemberChatbotViewModel
+
+@{
+    ViewData["Title"] = "Trợ lý Smart Gym";
+}
+
+<style>
+    .chat-page {
+        max-width: 950px;
+        margin: 0 auto;
+    }
+
+    .chat-shell {
+        border: 1px solid #dee2e6;
+        background: #ffffff;
+    }
+
+    .chat-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #dee2e6;
+        background: #f8f9fa;
+    }
+
+    .chat-title {
+        margin: 0;
+        font-weight: 800;
+    }
+
+    .chat-subtitle {
+        margin: 5px 0 0;
+        color: #6c757d;
+    }
+
+    .chat-messages {
+        height: 520px;
+        overflow-y: auto;
+        padding: 20px;
+        background: #f7f8fa;
+    }
+
+    .chat-row {
+        display: flex;
+        margin-bottom: 16px;
+    }
+
+    .chat-row.user {
+        justify-content: flex-end;
+    }
+
+    .chat-row.bot {
+        justify-content: flex-start;
+    }
+
+    .chat-bubble {
+        max-width: 75%;
+        padding: 12px 15px;
+        border-radius: 14px;
+        white-space: pre-line;
+        line-height: 1.5;
+    }
+
+    .chat-row.user .chat-bubble {
+        background: #212529;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .chat-row.bot .chat-bubble {
+        background: white;
+        border: 1px solid #dee2e6;
+        color: #212529;
+        border-bottom-left-radius: 4px;
+    }
+
+    .chat-time {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.75rem;
+        opacity: 0.7;
+    }
+
+    .chat-input-area {
+        padding: 16px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .quick-question {
+        margin: 4px;
+    }
+
+    .typing-indicator {
+        display: none;
+        color: #6c757d;
+        margin-bottom: 12px;
+    }
+
+    @@media (max-width: 576px) {
+        .chat-bubble {
+            max-width: 90%;
+        }
+
+        .chat-messages {
+            height: 450px;
+        }
+    }
+</style>
+
+<div class="chat-page">
+<p class="text-muted">Hiển thị 20 cuộc trao đổi gần nhất; lưu tối đa @Math.Clamp(Configuration.GetValue("Chatbot:HistoryLimit", 500), 20, 2000) cuộc trao đổi. Bạn có thể xóa lịch sử bên dưới.</p>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+
+        <div>
+            <h1>Trợ lý Smart Gym</h1>
+
+            <p class="text-muted mb-0">
+                Hỏi về gói tập,
+                lịch lớp và chỉ số fitness của bạn.
+            </p>
+        </div>
+
+        <form asp-controller="MemberChatbot"
+              asp-action="ClearHistory"
+              method="post">
+
+            <button type="submit"
+                    class="btn btn-outline-danger"
+                    onclick="return confirm('Xóa toàn bộ lịch sử hội thoại?');">
+
+                Xóa lịch sử
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+
+    <div class="chat-shell">
+
+        <div class="chat-header">
+
+            <h4 class="chat-title">
+                Trợ lý fitness Smart Gym
+            </h4>
+
+            <p class="chat-subtitle">
+                Hỏi về dữ liệu cá nhân và kiến thức fitness
+            </p>
+
+        </div>
+
+
+        <div id="chatMessages"
+             class="chat-messages">
+
+            <div class="chat-row bot">
+
+                <div class="chat-bubble">
+
+                    Xin chào! Tôi là trợ lý Smart Gym.
+                    Bạn có thể hỏi về gói tập, lịch lớp,
+                    điểm danh, BMI, calories và nước uống.
+
+                </div>
+
+            </div>
+
+
+            @foreach (var item in Model.History)
+            {
+                <div class="chat-row user">
+
+                    <div class="chat-bubble">
+
+                        @item.UserMessage
+
+                        <span class="chat-time">
+                            @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chat-row bot">
+
+                    <div class="chat-bubble">
+
+                        @item.BotResponse
+
+                        <span class="chat-time">
+                            @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </span>
+
+                    </div>
+
+                </div>
+            }
+
+
+            <div id="typingIndicator"
+                 class="typing-indicator">
+
+                Trợ lý Smart Gym is thinking...
+
+            </div>
+
+        </div>
+
+
+        <div class="chat-input-area">
+
+            <div class="mb-3">
+
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm quick-question"
+                        data-question="Gói tập của tôi còn bao nhiêu ngày?">
+
+                    Gói tập
+
+                </button>
+
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm quick-question"
+                        data-question="Lớp sắp tới của tôi là gì?">
+
+                    Lớp sắp tới
+
+                </button>
+
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm quick-question"
+                        data-question="BMI mới nhất của tôi là bao nhiêu?">
+
+                    BMI mới nhất
+
+                </button>
+
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm quick-question"
+                        data-question="Tôi nên uống bao nhiêu nước?">
+
+                    Nước uống
+
+                </button>
+
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm quick-question"
+                        data-question="Calories và macros của tôi là bao nhiêu?">
+
+                    Dinh dưỡng
+
+                </button>
+
+            </div>
+
+
+            <form id="chatForm">
+
+                @Html.AntiForgeryToken()
+
+                <div class="input-group">
+
+                    <input id="messageInput"
+                           name="message"
+                           class="form-control"
+                           maxlength="1000"
+                           autocomplete="off"
+                           placeholder="Nhập câu hỏi cho trợ lý..." />
+
+                    <button id="sendButton"
+                            type="submit"
+                            class="btn btn-primary">Gửi</button>
+
+                </div>
+
+                <div id="chatError"
+                     class="text-danger mt-2">
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const form =
+                document.getElementById("chatForm");
+
+            const input =
+                document.getElementById("messageInput");
+
+            const sendButton =
+                document.getElementById("sendButton");
+
+            const messages =
+                document.getElementById("chatMessages");
+
+            const typingIndicator =
+                document.getElementById("typingIndicator");
+
+            const errorDiv =
+                document.getElementById("chatError");
+
+
+            function scrollToBottom() {
+
+                messages.scrollTop =
+                    messages.scrollHeight;
+
+            }
+
+
+            function escapeHtml(text) {
+
+                const div =
+                    document.createElement("div");
+
+                div.textContent = text;
+
+                return div.innerHTML;
+
+            }
+
+
+            function addMessage(
+                role,
+                text,
+                createdAt = ""
+            ) {
+
+                const row =
+                    document.createElement("div");
+
+                row.className =
+                    "chat-row " + role;
+
+
+                const bubble =
+                    document.createElement("div");
+
+                bubble.className =
+                    "chat-bubble";
+
+                bubble.innerHTML =
+                    escapeHtml(text)
+                        .replace(/\n/g, "<br>");
+
+
+                if (createdAt) {
+
+                    const time =
+                        document.createElement("span");
+
+                    time.className =
+                        "chat-time";
+
+                    time.textContent =
+                        createdAt;
+
+                    bubble.appendChild(time);
+
+                }
+
+
+                row.appendChild(bubble);
+
+                messages.insertBefore(
+                    row,
+                    typingIndicator
+                );
+
+                scrollToBottom();
+
+            }
+
+
+            async function sendMessage(message) {
+
+                if (sendButton.disabled) return;
+                message = message.trim();
+
+                if (!message) {
+
+                    errorDiv.textContent =
+                        "Vui lòng nhập câu hỏi.";
+
+                    return;
+
+                }
+
+
+                errorDiv.textContent = "";
+
+                addMessage(
+                    "user",
+                    message
+                );
+
+
+                input.value = "";
+
+                sendButton.disabled = true;
+
+                typingIndicator.style.display =
+                    "block";
+
+                scrollToBottom();
+
+
+                try {
+
+                    const token =
+                    form.querySelector(
+                        'input[name="__RequestVerificationToken"]'
+                    ).value;
+
+
+                    const body =
+                        new URLSearchParams();
+
+                    body.append(
+                        "message",
+                        message
+                    );
+
+                    body.append(
+                        "__RequestVerificationToken",
+                        token
+                    );
+
+
+                    const response =
+                        await fetch(
+                            '@Url.Action("Ask", "MemberChatbot", new { area = "" })',
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded"
+                                },
+
+                                body: body.toString()
+                            }
+                        );
+
+
+                    if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) {
+                        throw new Error(response.status === 429 ? "Bạn gửi câu hỏi quá nhanh. Vui lòng chờ một phút." : "Phiên đăng nhập đã hết hoặc dịch vụ chưa sẵn sàng.");
+                    }
+                    const data = await response.json();
+
+
+                    if (!data.success) {
+
+                        errorDiv.textContent =
+                            data.message
+                            ?? "Không thể gửi câu hỏi.";
+
+                        return;
+
+                    }
+
+
+                    addMessage(
+                        "bot",
+                        data.reply,
+                        data.createdAt
+                    );
+
+                }
+                catch (error) {
+
+                    errorDiv.textContent =
+                        error.message || "Không thể kết nối trợ lý. Vui lòng thử lại.";
+
+                }
+                finally {
+
+                    typingIndicator.style.display =
+                        "none";
+
+                    sendButton.disabled =
+                        false;
+
+                    input.focus();
+
+                    scrollToBottom();
+
+                }
+
+            }
+
+
+            form.addEventListener(
+                "submit",
+                function (event) {
+
+                    event.preventDefault();
+
+                    sendMessage(
+                        input.value
+                    );
+
+                }
+            );
+
+
+            document
+                .querySelectorAll(
+                    ".quick-question"
+                )
+                .forEach(button => {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            sendMessage(
+                                this.dataset.question
+                            );
+
+                        }
+                    );
+
+                });
+
+
+            scrollToBottom();
+
+        }
+    );
+
+</script>

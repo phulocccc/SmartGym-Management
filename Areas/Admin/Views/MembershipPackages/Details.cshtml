@@ -1,0 +1,12 @@
+@model SmartGymManagement.Models.MembershipPackage
+@{ ViewData["Title"] = "Chi tiết gói tập"; }
+<h1>Chi tiết gói tập</h1>
+<dl class="row">
+ <dt class="col-sm-3">Tên gói</dt><dd class="col-sm-9">@Model.PackageName</dd>
+ <dt class="col-sm-3">Mô tả</dt><dd class="col-sm-9">@Model.Description</dd>
+ <dt class="col-sm-3">Thời hạn</dt><dd class="col-sm-9">@Model.DurationDays ngày</dd>
+ <dt class="col-sm-3">Giá</dt><dd class="col-sm-9">@Model.Price.ToString("N0") VND</dd>
+ <dt class="col-sm-3">Hoạt động</dt><dd class="col-sm-9">@(Model.IsActive ? "Có" : "Không")</dd>
+</dl>
+<a asp-action="Edit" asp-route-id="@Model.PackageId" class="btn btn-primary">Chỉnh sửa</a>
+<a asp-action="Index" class="btn btn-secondary">Quay lại</a>

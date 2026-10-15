@@ -1,0 +1,47 @@
+@model SmartGymManagement.Models.Trainer
+
+@{
+    ViewData["Title"] = "Delete Trainer";
+}
+
+<h1>Delete Trainer</h1>
+
+<h4>Are you sure you want to deactivate this trainer?</h4>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+<table class="table table-bordered">
+    <tr>
+        <th>Full Name</th>
+        <td>@Model.FullName</td>
+    </tr>
+
+    <tr>
+        <th>Specialization</th>
+        <td>@Model.Specialization</td>
+    </tr>
+
+    <tr>
+        <th>Phone</th>
+        <td>@Model.Phone</td>
+    </tr>
+
+    <tr>
+        <th>Email</th>
+        <td>@Model.Email</td>
+    </tr>
+
+    <tr>
+        <th>Status</th>
+        <td>@Model.Status</td>
+    </tr>
+</table>
+
+<form asp-area="Admin" asp-controller="Trainers" asp-action="Delete" method="post">
+    <input type="hidden" asp-for="TrainerId" />
+
+    <button type="submit" class="btn btn-danger">Ngừng hoạt động</button>
+
+    <a asp-area="Admin" asp-controller="Trainers" asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
+</form>

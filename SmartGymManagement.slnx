@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SmartGymManagement.csproj" />
+  <Project Path="Tests/SmartGymManagement.Checks.csproj" />
+</Solution>

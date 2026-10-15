@@ -1,0 +1,168 @@
+@model SmartGymManagement.Models.ClassSchedule
+@using SmartGymManagement.Enums
+
+@{
+    ViewData["Title"] = "Create Class Schedule";
+}
+
+<h1>Create Class Schedule</h1>
+
+<form asp-area="Admin" asp-controller="ClassSchedules" asp-action="Create" method="post">
+<div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group mb-3">
+        <label asp-for="ClassName" class="control-label">Class Name</label>
+        <input asp-for="ClassName" class="form-control" />
+        <span asp-validation-for="ClassName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="StartTime" class="control-label">Start Time</label>
+        <input asp-for="StartTime" class="form-control" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" id="StartTime" />
+        <span asp-validation-for="StartTime" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="EndTime" class="control-label">End Time</label>
+        <input asp-for="EndTime" class="form-control" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" id="EndTime" />
+        <span asp-validation-for="EndTime" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="TrainerId" class="control-label">Trainer</label>
+        <select asp-for="TrainerId" class="form-control" id="TrainerId">
+            <option value="">-- Select Start Time and End Time first --</option>
+        </select>
+        <span asp-validation-for="TrainerId" class="text-danger"></span>
+        <div id="trainerAvailabilityMessage" class="text-danger mt-1"></div>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="RoomId" class="control-label">Room</label>
+        <select asp-for="RoomId" class="form-control" id="RoomId">
+            <option value="">-- Select Start Time and End Time first --</option>
+        </select>
+        <span asp-validation-for="RoomId" class="text-danger"></span>
+        <div id="roomAvailabilityMessage" class="text-danger mt-1"></div>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Capacity" class="control-label">Capacity</label>
+        <input asp-for="Capacity" class="form-control" />
+        <span asp-validation-for="Capacity" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Status" class="control-label">Status</label>
+        <select asp-for="Status" asp-items="Html.GetEnumSelectList<ClassStatus>()" class="form-control"></select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+
+    <a asp-area="Admin" asp-controller="ClassSchedules" asp-action="Index" class="btn btn-secondary">
+        Back
+    </a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const startInput = document.getElementById("StartTime");
+            const endInput = document.getElementById("EndTime");
+
+            const trainerSelect = document.getElementById("TrainerId");
+            const trainerMessageDiv = document.getElementById("trainerAvailabilityMessage");
+
+            const roomSelect = document.getElementById("RoomId");
+            const roomMessageDiv = document.getElementById("roomAvailabilityMessage");
+
+            async function loadAvailableTrainers() {
+                const startTime = startInput.value;
+                const endTime = endInput.value;
+
+                trainerSelect.innerHTML = "";
+                trainerMessageDiv.textContent = "";
+
+                if (!startTime || !endTime) {
+                    trainerSelect.innerHTML = '<option value="">-- Select Start Time and End Time first --</option>';
+                    return;
+                }
+
+                const url = `/Admin/ClassSchedules/GetAvailableTrainers?startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.success) {
+                    trainerSelect.innerHTML = '<option value="">-- No available trainers --</option>';
+                    trainerMessageDiv.textContent = data.message;
+                    return;
+                }
+
+                if (data.trainers.length === 0) {
+                    trainerSelect.innerHTML = '<option value="">-- No available trainers in this time range --</option>';
+                    trainerMessageDiv.textContent = "All trainers are already assigned during this time range.";
+                    return;
+                }
+
+                trainerSelect.innerHTML = '<option value="">-- Select Trainer --</option>';
+
+                data.trainers.forEach(trainer => {
+                    const option = document.createElement("option");
+                    option.value = trainer.trainerId;
+                    option.textContent = trainer.fullName;
+                    trainerSelect.appendChild(option);
+                });
+            }
+
+            async function loadAvailableRooms() {
+                const startTime = startInput.value;
+                const endTime = endInput.value;
+
+                roomSelect.innerHTML = "";
+                roomMessageDiv.textContent = "";
+
+                if (!startTime || !endTime) {
+                    roomSelect.innerHTML = '<option value="">-- Select Start Time and End Time first --</option>';
+                    return;
+                }
+
+                const url = `/Admin/ClassSchedules/GetAvailableRooms?startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.success) {
+                    roomSelect.innerHTML = '<option value="">-- No available rooms --</option>';
+                    roomMessageDiv.textContent = data.message;
+                    return;
+                }
+
+                if (data.rooms.length === 0) {
+                    roomSelect.innerHTML = '<option value="">-- No available rooms in this time range --</option>';
+                    roomMessageDiv.textContent = "All rooms are already booked during this time range.";
+                    return;
+                }
+
+                roomSelect.innerHTML = '<option value="">-- Select Room --</option>';
+
+                data.rooms.forEach(room => {
+                    const option = document.createElement("option");
+                    option.value = room.roomId;
+                    option.textContent = room.roomName;
+                    roomSelect.appendChild(option);
+                });
+            }
+
+            function loadAvailableResources() {
+                loadAvailableTrainers();
+                loadAvailableRooms();
+            }
+
+            startInput.addEventListener("change", loadAvailableResources);
+            endInput.addEventListener("change", loadAvailableResources);
+        });
+    </script>
+}

@@ -1,0 +1,73 @@
+@model SmartGymManagement.Models.Member
+
+@{
+    ViewData["Title"] = "Member Details";
+}
+
+<h1>Member Details</h1>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Full Name</th>
+        <td>@Model.User?.FullName</td>
+    </tr>
+
+    <tr>
+        <th>Email</th>
+        <td>@Model.User?.Email</td>
+    </tr>
+
+    <tr>
+        <th>Phone</th>
+        <td>@Model.User?.PhoneNumber</td>
+    </tr>
+
+    <tr>
+        <th>Date Of Birth</th>
+        <td>@Model.DateOfBirth?.ToString("dd/MM/yyyy")</td>
+    </tr>
+
+    <tr>
+        <th>Gender</th>
+        <td>@Model.Gender</td>
+    </tr>
+
+    <tr>
+        <th>Address</th>
+        <td>@Model.Address</td>
+    </tr>
+
+    <tr>
+        <th>Emergency Contact</th>
+        <td>@Model.EmergencyContact</td>
+    </tr>
+
+    <tr>
+        <th>Join Date</th>
+        <td>@Model.JoinDate.ToString("dd/MM/yyyy")</td>
+    </tr>
+
+    <tr>
+        <th>Status</th>
+        <td>@Model.Status</td>
+    </tr>
+
+    <tr>
+        <th>Account Active</th>
+        <td>@Model.User?.IsActive</td>
+    </tr>
+</table>
+
+<a asp-area="Admin" asp-controller="Members" asp-action="Edit" asp-route-id="@Model.MemberId" class="btn btn-warning">
+    Edit
+</a>
+
+<a asp-area="Admin" asp-controller="Members" asp-action="Index" class="btn btn-secondary">
+    Back
+</a>
+@if (Model.User?.PasswordHash == null && Model.User?.IsActive == true)
+{
+ <form asp-action="IssueSetupLink" asp-route-id="@Model.MemberId" method="post" class="mt-3">
+  <button type="submit" class="btn btn-outline-primary">Cấp lại liên kết đặt mật khẩu</button>
+ </form>
+}

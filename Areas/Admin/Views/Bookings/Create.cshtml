@@ -1,0 +1,43 @@
+@model SmartGymManagement.ViewModels.BookingCreateViewModel
+
+@{
+    ViewData["Title"] = "Create Booking";
+}
+
+<h1>Create Booking</h1>
+
+<form asp-area="Admin" asp-controller="Bookings" asp-action="Create" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="MemberId" class="control-label">Member</label>
+        <select asp-for="MemberId" asp-items="ViewBag.MemberId" class="form-control">
+            <option value="">-- Select Member --</option>
+        </select>
+        <span asp-validation-for="MemberId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="ClassId" class="control-label">Class</label>
+        <select asp-for="ClassId" asp-items="ViewBag.ClassId" class="form-control">
+            <option value="">-- Select Class --</option>
+        </select>
+        <span asp-validation-for="ClassId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Note" class="control-label">Note</label>
+        <textarea asp-for="Note" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Note" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Booking</button>
+
+    <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="btn btn-secondary">
+        Back
+    </a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

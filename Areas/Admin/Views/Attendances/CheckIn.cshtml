@@ -1,0 +1,121 @@
+@model SmartGymManagement.ViewModels.AttendanceCheckInViewModel
+@using SmartGymManagement.Enums
+
+@{
+    ViewData["Title"] = "Check In Member";
+}
+
+<h1>Check In Member</h1>
+
+<form asp-area="Admin"
+      asp-controller="Attendances"
+      asp-action="CheckIn"
+      method="post">
+
+    <div asp-validation-summary="All"
+         class="text-danger mb-3">
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="BookingId"
+               class="control-label">
+            Booking
+        </label>
+
+        <select asp-for="BookingId"
+                asp-items="ViewBag.BookingId"
+                class="form-control">
+            <option value="0">-- Select Booking --</option>
+        </select>
+
+        <span asp-validation-for="BookingId"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Method"
+               class="control-label">
+            Check-in Method
+        </label>
+
+        <select asp-for="Method"
+                asp-items="Html.GetEnumSelectList<AttendanceMethod>()"
+                class="form-control">
+        </select>
+
+        <span asp-validation-for="Method"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Note"
+               class="control-label">
+            Note
+        </label>
+
+        <textarea asp-for="Note"
+                  class="form-control"
+                  rows="3"></textarea>
+
+        <span asp-validation-for="Note"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="QrToken">QR / mã điểm danh</label>
+        <textarea asp-for="QrToken" class="form-control" rows="3" placeholder="Dán mã SGYM:... hoặc quét bằng camera"></textarea>
+        <span asp-validation-for="QrToken" class="text-danger"></span>
+        <button type="button" id="scanQr" class="btn btn-outline-primary mt-2">Quét QR bằng camera</button>
+        <video id="qrVideo" playsinline hidden style="max-width:100%;width:360px"></video>
+        <p id="qrMessage" role="status"></p>
+    </div>
+    <button type="submit"
+            class="btn btn-primary">
+        Check In
+    </button>
+
+    <a asp-area="Admin"
+       asp-controller="Attendances"
+       asp-action="Index"
+       class="btn btn-secondary">
+        Back
+    </a>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const button = document.getElementById("scanQr"), video = document.getElementById("qrVideo"), message = document.getElementById("qrMessage");
+        let stream = null, scanning = false;
+        function stop() { scanning = false; if (stream) stream.getTracks().forEach(track => track.stop()); stream = null; video.hidden = true; button.disabled = false; }
+        button.addEventListener("click", async () => {
+            if (!("BarcodeDetector" in window) || !navigator.mediaDevices?.getUserMedia) {
+                message.textContent = "Trình duyệt chưa hỗ trợ quét QR. Hãy dán mã dự phòng của hội viên."; return;
+            }
+            try {
+                button.disabled = true;
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = stream; video.hidden = false; await video.play(); scanning = true;
+                const detector = new BarcodeDetector({ formats: ["qr_code"] });
+                message.textContent = "Đưa QR của hội viên vào camera.";
+                while (scanning) {
+                    const codes = await detector.detect(video);
+                    const match = codes.find(code => code.rawValue.startsWith("SGYM:"));
+                    if (match) {
+                        document.getElementById("QrToken").value = match.rawValue;
+                        document.getElementById("Method").value = "1";
+                        document.getElementById("BookingId").value = "0";
+                        message.textContent = "Đã đọc QR. Bấm Check In để xác nhận điểm danh."; stop(); break;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+            } catch { stop(); message.textContent = "Không mở được camera. Hãy dán mã dự phòng."; }
+        });
+        window.addEventListener("pagehide", stop);
+    });
+    </script>
+}

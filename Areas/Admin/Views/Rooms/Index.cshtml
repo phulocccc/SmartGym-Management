@@ -1,0 +1,41 @@
+@model IEnumerable<SmartGymManagement.Models.Room>
+
+    @{
+    ViewData["Title"] = "Rooms";
+    }
+
+    <h1>Rooms</h1>
+<partial name="_ListFilters" />
+
+    <p>
+        <a asp-area="Admin" asp-controller="Rooms" asp-action="Create" class="btn btn-primary">
+            Create New Room
+        </a>
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Room Name</th>
+                <th>Capacity</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+{
+            <tr>
+                <td>@item.RoomName</td>
+                <td>@item.Capacity</td>
+                <td>@item.IsActive</td>
+                <td>
+                    <a asp-area="Admin" asp-controller="Rooms" asp-action="Edit" asp-route-id="@item.RoomId">Edit</a> |
+                    <a asp-area="Admin" asp-controller="Rooms" asp-action="Details" asp-route-id="@item.RoomId">Details</a> |
+                    <a asp-area="Admin" asp-controller="Rooms" asp-action="Delete" asp-route-id="@item.RoomId">Deactivate</a>
+                </td>
+            </tr>
+}
+        </tbody>
+    </table>

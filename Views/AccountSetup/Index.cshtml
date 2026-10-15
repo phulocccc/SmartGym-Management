@@ -1,0 +1,12 @@
+@model SmartGymManagement.ViewModels.AccountSetupViewModel
+@{ ViewData["Title"] = "Thiết lập mật khẩu"; }
+<h1>Thiết lập mật khẩu</h1>
+<p>Chọn mật khẩu riêng có ít nhất 10 ký tự, gồm chữ thường và chữ số.</p>
+<form asp-action="Index" method="post" class="col-md-6">
+ <div asp-validation-summary="All" class="text-danger"></div>
+ <input asp-for="UserId" type="hidden" /><input asp-for="Token" type="hidden" />
+ <div class="mb-3"><label asp-for="Password">Mật khẩu</label><input asp-for="Password" class="form-control" autocomplete="new-password" /></div>
+ <div class="mb-3"><label asp-for="ConfirmPassword">Nhập lại mật khẩu</label><input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" /></div>
+ <button class="btn btn-primary" type="submit">Lưu mật khẩu</button>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

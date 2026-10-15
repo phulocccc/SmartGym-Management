@@ -1,0 +1,62 @@
+@model IEnumerable<SmartGymManagement.Models.Attendance>
+
+@{
+    ViewData["Title"] = "Attendances";
+}
+
+<h1>Attendances</h1>
+<partial name="_ListFilters" />
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<p>
+    <a asp-area="Admin"
+       asp-controller="Attendances"
+       asp-action="CheckIn"
+       class="btn btn-primary">
+        Check In Member
+    </a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Member</th>
+            <th>Email</th>
+            <th>Class</th>
+            <th>Trainer</th>
+            <th>Room</th>
+            <th>Check-in Time</th>
+            <th>Method</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+@foreach (var item in Model)
+{
+        <tr>
+            <td>@item.Member?.User?.FullName</td>
+            <td>@item.Member?.User?.Email</td>
+            <td>@item.ClassSchedule?.ClassName</td>
+            <td>@item.ClassSchedule?.Trainer?.FullName</td>
+            <td>@item.ClassSchedule?.Room?.RoomName</td>
+            <td>@item.CheckInTime.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>@item.Method</td>
+            <td>
+                <a asp-area="Admin"
+                   asp-controller="Attendances"
+                   asp-action="Details"
+                   asp-route-id="@item.AttendanceId">
+                    Details
+                </a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -1,0 +1,15 @@
+@model SmartGymManagement.ViewModels.MemberProfileViewModel
+@{ ViewData["Title"] = "Hồ sơ hội viên"; }
+<h1>Hồ sơ hội viên</h1>
+@if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+<form asp-action="Index" method="post" class="col-md-6">
+ <div asp-validation-summary="All" class="text-danger"></div>
+ <div class="mb-3"><label asp-for="FullName">Họ tên</label><input asp-for="FullName" class="form-control" /></div>
+ <div class="mb-3"><label asp-for="PhoneNumber">Số điện thoại</label><input asp-for="PhoneNumber" class="form-control" /></div>
+ <div class="mb-3"><label asp-for="DateOfBirth">Ngày sinh</label><input asp-for="DateOfBirth" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" /></div>
+ <div class="mb-3"><label asp-for="Gender">Giới tính dùng cho công thức fitness</label><select asp-for="Gender" class="form-select"><option value="">Chưa cung cấp</option><option value="Male">Nam</option><option value="Female">Nữ</option></select></div>
+ <div class="mb-3"><label asp-for="Address">Địa chỉ</label><textarea asp-for="Address" class="form-control"></textarea></div>
+ <div class="mb-3"><label asp-for="EmergencyContact">Số liên hệ khẩn cấp</label><input asp-for="EmergencyContact" class="form-control" /></div>
+ <button type="submit" class="btn btn-primary">Lưu hồ sơ</button>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

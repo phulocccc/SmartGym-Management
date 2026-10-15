@@ -1,0 +1,1671 @@
+@model SmartGymManagement.ViewModels.FitnessReportViewModel
+
+@using System.Globalization
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Fitness Body Composition Report";
+
+    var record = Model.CurrentRecord;
+
+    var history = Model.History
+        .OrderBy(x => x.RecordedAt)
+        .ToList();
+
+    // -------------------------------------------------
+    // DERIVED VALUES
+    // -------------------------------------------------
+
+    decimal? fatMassKg = null;
+
+    if (record.BodyFatPercentage.HasValue)
+    {
+        fatMassKg = Math.Round(
+            record.WeightKg *
+            record.BodyFatPercentage.Value /
+            100m,
+            2
+        );
+    }
+
+    decimal? weightDifferenceKg = null;
+
+    if (record.IdealBodyWeightKg.HasValue)
+    {
+        weightDifferenceKg = Math.Round(
+            record.WeightKg -
+            record.IdealBodyWeightKg.Value,
+            2
+        );
+    }
+
+    decimal? leanPercentage = null;
+
+    if (record.LeanBodyMassKg.HasValue &&
+        record.WeightKg > 0)
+    {
+        leanPercentage = Math.Round(
+            record.LeanBodyMassKg.Value /
+            record.WeightKg *
+            100m,
+            2
+        );
+    }
+
+    string bodyType = record.Category switch
+    {
+        SmartGymManagement.Enums.BMICategory.Underweight
+            => "Underweight",
+
+        SmartGymManagement.Enums.BMICategory.Normal
+            => "Standard",
+
+        SmartGymManagement.Enums.BMICategory.Overweight
+            => "Overweight",
+
+        SmartGymManagement.Enums.BMICategory.Obese
+            => "Obese",
+
+        _ => "Unknown"
+    };
+
+    string weightControlText = "N/A";
+
+    if (weightDifferenceKg.HasValue)
+    {
+        if (Math.Abs(weightDifferenceKg.Value) < 0.5m)
+        {
+            weightControlText =
+                "Current weight is close to the ideal estimate.";
+        }
+        else if (weightDifferenceKg.Value > 0)
+        {
+            weightControlText =
+                $"Approximately {weightDifferenceKg.Value:N1} kg above the ideal estimate.";
+        }
+        else
+        {
+            weightControlText =
+                $"Approximately {Math.Abs(weightDifferenceKg.Value):N1} kg below the ideal estimate.";
+        }
+    }
+
+    // -------------------------------------------------
+    // SCALE MARKER POSITIONS
+    // -------------------------------------------------
+
+    decimal ClampScale(
+        decimal value,
+        decimal min,
+        decimal max)
+    {
+        if (value < min)
+        {
+            return 0m;
+        }
+
+        if (value > max)
+        {
+            return 100m;
+        }
+
+        return (value - min) /
+               (max - min) *
+               100m;
+    }
+
+    string ToCssPercent(decimal value)
+    {
+        return value.ToString(
+            "0.##",
+            CultureInfo.InvariantCulture
+        );
+    }
+
+    var bmiPosition =
+        ToCssPercent(
+            ClampScale(
+                record.BMIValue,
+                10m,
+                40m
+            )
+        );
+
+    var weightPosition =
+        ToCssPercent(
+            ClampScale(
+                record.IdealBodyWeightKg.HasValue &&
+                record.IdealBodyWeightKg.Value > 0
+                    ? record.WeightKg /
+                      record.IdealBodyWeightKg.Value *
+                      100m
+                    : 100m,
+                60m,
+                140m
+            )
+        );
+
+    var bodyFatPosition =
+        ToCssPercent(
+            ClampScale(
+                record.BodyFatPercentage ?? 0m,
+                5m,
+                45m
+            )
+        );
+
+    var leanPosition =
+        ToCssPercent(
+            ClampScale(
+                leanPercentage ?? 0m,
+                40m,
+                100m
+            )
+        );
+
+    var whtrPosition =
+        ToCssPercent(
+            ClampScale(
+                record.WaistToHeightRatio ?? 0m,
+                0.30m,
+                0.80m
+            )
+        );
+
+    // -------------------------------------------------
+    // CHART DATA
+    // -------------------------------------------------
+
+    var chartData = history.Select(x => new
+    {
+        date = x.RecordedAt.ToString(
+            "dd/MM/yyyy"
+        ),
+
+        weight = x.WeightKg,
+
+        bmi = x.BMIValue,
+
+        bodyFat = x.BodyFatPercentage,
+
+        leanMass = x.LeanBodyMassKg,
+
+        tdee = x.TDEE,
+
+        water = x.EstimatedWaterLiters
+    }).ToList();
+
+    string chartJson =
+        JsonSerializer.Serialize(chartData);
+}
+
+<style>
+    .fitness-report {
+        max-width: 1450px;
+        margin: 0 auto;
+    }
+
+    .report-header {
+        border: 2px solid #212529;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: #ffffff;
+    }
+
+    .report-title {
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+    }
+
+    .report-subtitle {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .report-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.75fr);
+        gap: 20px;
+    }
+
+    .report-panel {
+        border: 1px solid #adb5bd;
+        background: #ffffff;
+        margin-bottom: 18px;
+    }
+
+    .report-panel-title {
+        padding: 9px 12px;
+        border-bottom: 1px solid #adb5bd;
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        background: #f4f5f7;
+    }
+
+    .report-panel-body {
+        padding: 14px;
+    }
+
+    .metric-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .metric-table th,
+    .metric-table td {
+        padding: 8px 6px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .metric-table th {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .metric-value {
+        text-align: right;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .summary-number {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .summary-label {
+        color: #6c757d;
+        margin-top: 6px;
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .summary-box {
+        border: 1px solid #dee2e6;
+        padding: 14px;
+        text-align: center;
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .analysis-row {
+        display: grid;
+        grid-template-columns: 150px 1fr 90px;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .analysis-name {
+        font-weight: 700;
+    }
+
+    .analysis-value {
+        font-weight: 800;
+        text-align: right;
+    }
+
+    .analysis-track {
+        position: relative;
+        display: flex;
+        height: 18px;
+        border: 1px solid #adb5bd;
+        overflow: visible;
+    }
+
+    .segment-low {
+        background: #e9ecef;
+    }
+
+    .segment-normal {
+        background: #ced4da;
+    }
+
+    .segment-high {
+        background: #adb5bd;
+    }
+
+    .segment-very-high {
+        background: #868e96;
+    }
+
+    .analysis-marker {
+        position: absolute;
+        top: -7px;
+        width: 3px;
+        height: 30px;
+        background: #212529;
+        transform: translateX(-50%);
+        z-index: 5;
+    }
+
+    .analysis-marker::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 7px solid #212529;
+    }
+
+    .scale-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.72rem;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+
+    .body-type-box {
+        border: 2px solid #212529;
+        padding: 18px;
+        text-align: center;
+    }
+
+    .body-type-value {
+        font-size: 1.8rem;
+        font-weight: 900;
+    }
+
+    .nutrition-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .nutrition-item {
+        border: 1px solid #dee2e6;
+        padding: 12px 8px;
+        text-align: center;
+    }
+
+    .nutrition-value {
+        font-size: 1.35rem;
+        font-weight: 800;
+    }
+
+    .nutrition-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .chart-wrapper {
+        height: 360px;
+    }
+
+    .report-note {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    @@media (max-width: 991px) {
+        .report-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .analysis-row {
+            grid-template-columns: 120px 1fr;
+        }
+
+        .analysis-value {
+            grid-column: 2;
+            text-align: left;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .summary-grid,
+        .nutrition-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="fitness-report">
+
+    <!-- REPORT HEADER -->
+    <div class="report-header">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+
+            <div>
+                <h1 class="report-title">
+                    FITNESS BODY COMPOSITION REPORT
+                </h1>
+
+                <p class="report-subtitle">
+                    Smart Gym personalized fitness assessment
+                </p>
+            </div>
+
+            <div class="text-end">
+                <div>
+                    <strong>Recorded:</strong>
+                    @record.RecordedAt.ToString("dd/MM/yyyy HH:mm")
+                </div>
+
+                <div>
+                    <strong>Assessment ID:</strong>
+                    #@record.BMIRecordId
+                </div>
+            </div>
+
+        </div>
+
+        <hr />
+
+        <div class="row">
+
+            <div class="col-md-3">
+                <strong>Age</strong><br />
+                @record.AgeAtRecord years
+            </div>
+
+            <div class="col-md-3">
+                <strong>Gender</strong><br />
+                @record.GenderAtRecord
+            </div>
+
+            <div class="col-md-3">
+                <strong>Activity Level</strong><br />
+                @record.ActivityLevel
+            </div>
+
+            <div class="col-md-3">
+                <strong>Fitness Goal</strong><br />
+                @record.FitnessGoal
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="report-grid">
+
+        <!-- ================================================= -->
+        <!-- LEFT COLUMN                                       -->
+        <!-- ================================================= -->
+
+        <div>
+
+            <!-- BODY COMPOSITION -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Body Composition Analysis
+                </div>
+
+                <div class="report-panel-body">
+
+                    <table class="metric-table">
+
+                        <tr>
+                            <th>Weight</th>
+
+                            <td class="metric-value">
+                                @record.WeightKg.ToString("N2") kg
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Body Fat Mass</th>
+
+                            <td class="metric-value">
+                                @if (fatMassKg.HasValue)
+                                {
+                                    @($"{fatMassKg.Value:N2} kg")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Lean Body Mass</th>
+
+                            <td class="metric-value">
+                                @if (record.LeanBodyMassKg.HasValue)
+                                {
+                                    @($"{record.LeanBodyMassKg.Value:N2} kg")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Body Fat Percentage</th>
+
+                            <td class="metric-value">
+                                @if (record.BodyFatPercentage.HasValue)
+                                {
+                                    @($"{record.BodyFatPercentage.Value:N2}%")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Estimated Daily Water Target</th>
+
+                            <td class="metric-value">
+                                @record.EstimatedWaterLiters.ToString("N2") L
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- MUSCLE / FAT ANALYSIS -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Muscle / Fat Analysis
+                </div>
+
+                <div class="report-panel-body">
+
+                    <!-- WEIGHT -->
+                    <div class="analysis-row">
+
+                        <div class="analysis-name">
+                            Weight
+                        </div>
+
+                        <div>
+                            <div class="analysis-track">
+
+                                <div class="segment-low"
+                                     style="width:25%">
+                                </div>
+
+                                <div class="segment-normal"
+                                     style="width:25%">
+                                </div>
+
+                                <div class="segment-high"
+                                     style="width:25%">
+                                </div>
+
+                                <div class="segment-very-high"
+                                     style="width:25%">
+                                </div>
+
+                                <div class="analysis-marker"
+                                     style="left:@weightPosition%">
+                                </div>
+
+                            </div>
+
+                            <div class="scale-labels">
+                                <span>Low</span>
+                                <span>Near ideal</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+
+                        <div class="analysis-value">
+                            @record.WeightKg.ToString("N1") kg
+                        </div>
+
+                    </div>
+
+
+                    <!-- LEAN BODY MASS -->
+                    <div class="analysis-row">
+
+                        <div class="analysis-name">
+                            Lean Mass
+                        </div>
+
+                        <div>
+                            <div class="analysis-track">
+
+                                <div class="segment-low"
+                                     style="width:33.33%">
+                                </div>
+
+                                <div class="segment-normal"
+                                     style="width:33.33%">
+                                </div>
+
+                                <div class="segment-high"
+                                     style="width:33.34%">
+                                </div>
+
+                                @if (leanPercentage.HasValue)
+                                {
+                                    <div class="analysis-marker"
+                                         style="left:@leanPosition%">
+                                    </div>
+                                }
+
+                            </div>
+
+                            <div class="scale-labels">
+                                <span>Lower</span>
+                                <span>Middle</span>
+                                <span>Higher</span>
+                            </div>
+                        </div>
+
+                        <div class="analysis-value">
+                            @if (record.LeanBodyMassKg.HasValue)
+                            {
+                                @($"{record.LeanBodyMassKg.Value:N1} kg")
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </div>
+
+                    </div>
+
+
+                    <!-- FAT MASS -->
+                    <div class="analysis-row">
+
+                        <div class="analysis-name">
+                            Fat Mass
+                        </div>
+
+                        <div>
+                            <div class="analysis-track">
+
+                                <div class="segment-low"
+                                     style="width:33.33%">
+                                </div>
+
+                                <div class="segment-normal"
+                                     style="width:33.33%">
+                                </div>
+
+                                <div class="segment-high"
+                                     style="width:33.34%">
+                                </div>
+
+                                @if (record.BodyFatPercentage.HasValue)
+                                {
+                                    <div class="analysis-marker"
+                                         style="left:@bodyFatPosition%">
+                                    </div>
+                                }
+
+                            </div>
+
+                            <div class="scale-labels">
+                                <span>Lower</span>
+                                <span>Middle</span>
+                                <span>Higher</span>
+                            </div>
+                        </div>
+
+                        <div class="analysis-value">
+                            @if (fatMassKg.HasValue)
+                            {
+                                @($"{fatMassKg.Value:N1} kg")
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- OBESITY ANALYSIS -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Obesity Analysis
+                </div>
+
+                <div class="report-panel-body">
+
+                    <!-- BMI -->
+                    <div class="analysis-row">
+
+                        <div class="analysis-name">
+                            BMI
+                        </div>
+
+                        <div>
+                            <div class="analysis-track">
+
+                                <div class="segment-low"
+                                     style="width:28%">
+                                </div>
+
+                                <div class="segment-normal"
+                                     style="width:22%">
+                                </div>
+
+                                <div class="segment-high"
+                                     style="width:17%">
+                                </div>
+
+                                <div class="segment-very-high"
+                                     style="width:33%">
+                                </div>
+
+                                <div class="analysis-marker"
+                                     style="left:@bmiPosition%">
+                                </div>
+
+                            </div>
+
+                            <div class="scale-labels">
+                                <span>Under</span>
+                                <span>Normal</span>
+                                <span>Over</span>
+                                <span>Obese</span>
+                            </div>
+                        </div>
+
+                        <div class="analysis-value">
+                            @record.BMIValue.ToString("N2")
+                        </div>
+
+                    </div>
+
+
+                    <!-- BODY FAT -->
+                    <div class="analysis-row">
+
+                        <div class="analysis-name">
+                            Body Fat
+                        </div>
+
+                        <div>
+                            <div class="analysis-track">
+
+                                <div class="segment-low"
+                                     style="width:33.33%">
+                                </div>
+
+                                <div class="segment-normal"
+                                     style="width:33.33%">
+                                </div>
+
+                                <div class="segment-high"
+                                     style="width:33.34%">
+                                </div>
+
+                                @if (record.BodyFatPercentage.HasValue)
+                                {
+                                    <div class="analysis-marker"
+                                         style="left:@bodyFatPosition%">
+                                    </div>
+                                }
+
+                            </div>
+
+                            <div class="scale-labels">
+                                <span>Lower</span>
+                                <span>Middle</span>
+                                <span>Higher</span>
+                            </div>
+                        </div>
+
+                        <div class="analysis-value">
+                            @if (record.BodyFatPercentage.HasValue)
+                            {
+                                @($"{record.BodyFatPercentage.Value:N2}%")
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </div>
+
+                    </div>
+
+
+                    <!-- WHtR -->
+                    <div class="analysis-row">
+
+                        <div class="analysis-name">
+                            WHtR
+                        </div>
+
+                        <div>
+                            <div class="analysis-track">
+
+                                <div class="segment-low"
+                                     style="width:33.33%">
+                                </div>
+
+                                <div class="segment-normal"
+                                     style="width:33.33%">
+                                </div>
+
+                                <div class="segment-high"
+                                     style="width:33.34%">
+                                </div>
+
+                                @if (record.WaistToHeightRatio.HasValue)
+                                {
+                                    <div class="analysis-marker"
+                                         style="left:@whtrPosition%">
+                                    </div>
+                                }
+
+                            </div>
+
+                            <div class="scale-labels">
+                                <span>Lower</span>
+                                <span>Middle</span>
+                                <span>Higher</span>
+                            </div>
+                        </div>
+
+                        <div class="analysis-value">
+                            @if (record.WaistToHeightRatio.HasValue)
+                            {
+                                @record.WaistToHeightRatio.Value.ToString("N2")
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PROGRESS CHART -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Body Composition Change
+                </div>
+
+                <div class="report-panel-body">
+
+                    <div class="row mb-3">
+
+                        <div class="col-md-5">
+
+                            <label class="form-label"
+                                   for="reportMetricSelector">
+
+                                Progress Metric
+
+                            </label>
+
+                            <select id="reportMetricSelector"
+                                    class="form-select">
+
+                                <option value="weight">
+                                    Weight
+                                </option>
+
+                                <option value="bmi">
+                                    BMI
+                                </option>
+
+                                <option value="bodyFat">
+                                    Body Fat Percentage
+                                </option>
+
+                                <option value="leanMass">
+                                    Lean Body Mass
+                                </option>
+
+                                <option value="tdee">
+                                    TDEE
+                                </option>
+
+                                <option value="water">
+                                    Daily Water Target
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    @if (history.Count == 1)
+                    {
+                        <div class="alert alert-info">
+                            Add more assessments to see a clear progress trend.
+                        </div>
+                    }
+
+                    <div class="chart-wrapper">
+
+                        <canvas id="bodyCompositionHistoryChart">
+                        </canvas>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- RIGHT COLUMN                                      -->
+        <!-- ================================================= -->
+
+        <aside>
+
+            <!-- BODY TYPE -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Body Type
+                </div>
+
+                <div class="report-panel-body">
+
+                    <div class="body-type-box">
+
+                        <div class="body-type-value">
+                            @bodyType
+                        </div>
+
+                        <div class="text-muted mt-2">
+                            Based on the current BMI classification
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- BODY SUMMARY -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Body Summary
+                </div>
+
+                <div class="report-panel-body">
+
+                    <div class="summary-grid">
+
+                        <div class="summary-box">
+
+                            <div class="summary-number">
+                                @record.BMIValue.ToString("N2")
+                            </div>
+
+                            <p class="summary-label">
+                                BMI
+                            </p>
+
+                        </div>
+
+                        <div class="summary-box">
+
+                            <div class="summary-number">
+
+                                @if (record.BodyFatPercentage.HasValue)
+                                {
+                                    @($"{record.BodyFatPercentage.Value:N1}%")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+
+                            </div>
+
+                            <p class="summary-label">
+                                Body Fat
+                            </p>
+
+                        </div>
+
+                        <div class="summary-box">
+
+                            <div class="summary-number">
+
+                                @if (record.LeanBodyMassKg.HasValue)
+                                {
+                                    @($"{record.LeanBodyMassKg.Value:N1}")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+
+                            </div>
+
+                            <p class="summary-label">
+                                Lean Mass (kg)
+                            </p>
+
+                        </div>
+
+                        <div class="summary-box">
+
+                            <div class="summary-number">
+                                @record.EstimatedWaterLiters.ToString("N2")
+                            </div>
+
+                            <p class="summary-label">
+                                Water Target (L)
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- METABOLIC SUMMARY -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Metabolic Summary
+                </div>
+
+                <div class="report-panel-body">
+
+                    <table class="metric-table">
+
+                        <tr>
+                            <th>BMR</th>
+
+                            <td class="metric-value">
+                                @record.BMR.ToString("N0") kcal
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>TDEE</th>
+
+                            <td class="metric-value">
+                                @record.TDEE.ToString("N0") kcal
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Target Calories</th>
+
+                            <td class="metric-value">
+                                @record.TargetCalories.ToString("N0") kcal
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Activity Level</th>
+
+                            <td class="metric-value">
+                                @record.ActivityLevel
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- DAILY NUTRITION -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Daily Nutrition Target
+                </div>
+
+                <div class="report-panel-body">
+
+                    <div class="nutrition-grid">
+
+                        <div class="nutrition-item">
+
+                            <div class="nutrition-value">
+                                @record.ProteinGrams.ToString("N0") g
+                            </div>
+
+                            <div class="nutrition-label">
+                                Protein
+                            </div>
+
+                        </div>
+
+                        <div class="nutrition-item">
+
+                            <div class="nutrition-value">
+                                @record.CarbohydrateGrams.ToString("N0") g
+                            </div>
+
+                            <div class="nutrition-label">
+                                Carbs
+                            </div>
+
+                        </div>
+
+                        <div class="nutrition-item">
+
+                            <div class="nutrition-value">
+                                @record.FatGrams.ToString("N0") g
+                            </div>
+
+                            <div class="nutrition-label">
+                                Fat
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <hr />
+
+                    <div class="text-center">
+
+                        <div class="summary-number">
+                            @record.EstimatedWaterLiters.ToString("N2") L
+                        </div>
+
+                        <div class="summary-label">
+                            Estimated daily water target
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- WEIGHT CONTROL -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Weight Control
+                </div>
+
+                <div class="report-panel-body">
+
+                    <table class="metric-table">
+
+                        <tr>
+                            <th>Current Weight</th>
+
+                            <td class="metric-value">
+                                @record.WeightKg.ToString("N2") kg
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Ideal Weight Estimate</th>
+
+                            <td class="metric-value">
+
+                                @if (record.IdealBodyWeightKg.HasValue)
+                                {
+                                    @($"{record.IdealBodyWeightKg.Value:N2} kg")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Weight Difference</th>
+
+                            <td class="metric-value">
+
+                                @if (weightDifferenceKg.HasValue)
+                                {
+                                    @($"{weightDifferenceKg.Value:+0.00;-0.00;0.00} kg")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+
+                            </td>
+                        </tr>
+
+                    </table>
+
+                    <p class="report-note mt-3 mb-0">
+                        @weightControlText
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- ABDOMINAL ANALYSIS -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Abdominal Analysis
+                </div>
+
+                <div class="report-panel-body">
+
+                    <table class="metric-table">
+
+                        <tr>
+                            <th>Waist Circumference</th>
+
+                            <td class="metric-value">
+
+                                @if (record.WaistCm.HasValue)
+                                {
+                                    @($"{record.WaistCm.Value:N2} cm")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Waist-to-Hip Ratio</th>
+
+                            <td class="metric-value">
+
+                                @if (record.WaistToHipRatio.HasValue)
+                                {
+                                    @record.WaistToHipRatio.Value.ToString("N2")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Waist-to-Height Ratio</th>
+
+                            <td class="metric-value">
+
+                                @if (record.WaistToHeightRatio.HasValue)
+                                {
+                                    @record.WaistToHeightRatio.Value.ToString("N2")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- ASSESSMENT INPUT -->
+            <section class="report-panel">
+
+                <div class="report-panel-title">
+                    Measurement Input
+                </div>
+
+                <div class="report-panel-body">
+
+                    <table class="metric-table">
+
+                        <tr>
+                            <th>Height</th>
+                            <td class="metric-value">
+                                @record.HeightCm.ToString("N2") cm
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Neck</th>
+
+                            <td class="metric-value">
+                                @(record.NeckCm.HasValue
+                                    ? $"{record.NeckCm.Value:N2} cm"
+                                    : "N/A")
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Waist</th>
+
+                            <td class="metric-value">
+                                @(record.WaistCm.HasValue
+                                    ? $"{record.WaistCm.Value:N2} cm"
+                                    : "N/A")
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Hip</th>
+
+                            <td class="metric-value">
+                                @(record.HipCm.HasValue
+                                    ? $"{record.HipCm.Value:N2} cm"
+                                    : "N/A")
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </aside>
+
+    </div>
+
+
+    <!-- NOTE -->
+    @if (!string.IsNullOrWhiteSpace(record.Note))
+    {
+        <section class="report-panel">
+
+            <div class="report-panel-title">
+                Assessment Note
+            </div>
+
+            <div class="report-panel-body">
+                @record.Note
+            </div>
+
+        </section>
+    }
+
+
+    <!-- DISCLAIMER -->
+    <div class="alert alert-warning mt-3">
+
+        <strong>Important:</strong>
+
+        This report uses calculated fitness estimates based on information
+        entered by the member.
+
+        It is designed for fitness tracking and educational use.
+        It is not a medical diagnosis or a substitute for professional
+        medical or dietary advice.
+
+    </div>
+
+
+    <!-- BUTTONS -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+
+        <a asp-controller="MemberBMI"
+           asp-action="Index"
+           class="btn btn-secondary">
+
+            Back to History
+
+        </a>
+
+        <a asp-controller="MemberBMI"
+           asp-action="Create"
+           class="btn btn-primary">
+
+            New Assessment
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const historyData =
+                @Html.Raw(chartJson);
+
+            const labels =
+                historyData.map(item => item.date);
+
+            const canvas =
+                document.getElementById(
+                    "bodyCompositionHistoryChart"
+                );
+
+            const selector =
+                document.getElementById(
+                    "reportMetricSelector"
+                );
+
+            const metrics = {
+
+                weight: {
+                    label: "Weight",
+                    unit: " kg",
+                    values:
+                        historyData.map(
+                            item => item.weight
+                        )
+                },
+
+                bmi: {
+                    label: "BMI",
+                    unit: "",
+                    values:
+                        historyData.map(
+                            item => item.bmi
+                        )
+                },
+
+                bodyFat: {
+                    label: "Body Fat",
+                    unit: "%",
+                    values:
+                        historyData.map(
+                            item => item.bodyFat
+                        )
+                },
+
+                leanMass: {
+                    label: "Lean Body Mass",
+                    unit: " kg",
+                    values:
+                        historyData.map(
+                            item => item.leanMass
+                        )
+                },
+
+                tdee: {
+                    label: "TDEE",
+                    unit: " kcal/day",
+                    values:
+                        historyData.map(
+                            item => item.tdee
+                        )
+                },
+
+                water: {
+                    label: "Daily Water Target",
+                    unit: " L",
+                    values:
+                        historyData.map(
+                            item => item.water
+                        )
+                }
+
+            };
+
+
+            function createChart(metricName) {
+
+                const metric =
+                    metrics[metricName];
+
+                return new Chart(
+                    canvas,
+                    {
+                        type: "line",
+
+                        data: {
+                            labels: labels,
+
+                            datasets: [
+                                {
+                                    label: metric.label,
+
+                                    data: metric.values,
+
+                                    borderWidth: 3,
+
+                                    pointRadius: 5,
+
+                                    pointHoverRadius: 7,
+
+                                    tension: 0.25,
+
+                                    spanGaps: false
+                                }
+                            ]
+                        },
+
+                        options: {
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+                            interaction: {
+                                mode: "index",
+                                intersect: false
+                            },
+
+                            plugins: {
+
+                                legend: {
+                                    display: true
+                                },
+
+                                tooltip: {
+
+                                    callbacks: {
+
+                                        label: function (context) {
+
+                                            return metric.label
+                                                + ": "
+                                                + context.parsed.y
+                                                + metric.unit;
+
+                                        }
+
+                                    }
+
+                                }
+
+                            },
+
+                            scales: {
+
+                                x: {
+
+                                    title: {
+                                        display: true,
+                                        text: "Assessment Date"
+                                    }
+
+                                },
+
+                                y: {
+
+                                    beginAtZero: false,
+
+                                    title: {
+                                        display: true,
+                                        text: metric.label
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            let progressChart =
+                createChart("weight");
+
+
+            selector.addEventListener(
+                "change",
+                function () {
+
+                    progressChart.destroy();
+
+                    progressChart =
+                        createChart(
+                            this.value
+                        );
+
+                }
+            );
+
+        }
+    );
+
+</script>

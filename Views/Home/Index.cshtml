@@ -1,0 +1,510 @@
+@inject IConfiguration Configuration
+@{
+    ViewData["Title"] = "Home";
+}
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #0d6efd, #111827);
+        color: white;
+        border-radius: 24px;
+        padding: 56px 42px;
+        margin-bottom: 28px;
+        box-shadow: 0 20px 44px rgba(13, 110, 253, 0.22);
+    }
+
+    .hero-eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        opacity: 0.85;
+        margin-bottom: 12px;
+    }
+
+    .hero-title {
+        font-size: clamp(2.1rem, 5vw, 4.3rem);
+        font-weight: 900;
+        line-height: 1.05;
+        margin-bottom: 18px;
+    }
+
+    .hero-text {
+        font-size: 1.1rem;
+        max-width: 720px;
+        opacity: 0.92;
+        margin-bottom: 26px;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .feature-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 24px;
+        height: 100%;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+    }
+
+    .feature-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: #e7f1ff;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-bottom: 14px;
+    }
+
+    .feature-title {
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .feature-text {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .quick-panel {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 24px;
+        height: 100%;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+    }
+
+    .quick-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        text-decoration: none;
+        color: #212529;
+        margin-bottom: 10px;
+        transition: 0.15s ease;
+        background: #ffffff;
+    }
+
+    .quick-link:hover {
+        transform: translateY(-2px);
+        border-color: #0d6efd;
+        color: #0d6efd;
+        box-shadow: 0 8px 18px rgba(13, 110, 253, 0.12);
+    }
+
+    .workflow-step {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        padding: 22px;
+        height: 100%;
+    }
+
+    .step-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #111827;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        margin-bottom: 14px;
+    }
+
+    .section-title {
+        font-weight: 900;
+        margin-bottom: 8px;
+    }
+
+    .section-subtitle {
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="hero-section">
+
+    <div class="hero-eyebrow">
+        Smart Gym Management System
+    </div>
+
+    <h1 class="hero-title">
+        Manage memberships, classes, attendance and fitness insights in one place.
+    </h1>
+
+    <p class="hero-text">
+        Smart Gym helps admins operate the gym efficiently while members can book classes,
+        track body metrics, view progress reports and ask the Smart Gym Assistant for personalized fitness information.
+    </p>
+
+    <div class="hero-actions">
+
+        @if (User.Identity != null &&
+             User.Identity.IsAuthenticated &&
+             User.IsInRole("Admin"))
+        {
+            <a asp-area="Admin"
+               asp-controller="Reports"
+               asp-action="Index"
+               class="btn btn-light btn-lg">
+                Go to Admin Reports
+            </a>
+
+            <a asp-area="Admin"
+               asp-controller="Members"
+               asp-action="Index"
+               class="btn btn-outline-light btn-lg">
+                Manage Members
+            </a>
+        }
+        else if (User.Identity != null &&
+                 User.Identity.IsAuthenticated &&
+                 User.IsInRole("Member"))
+        {
+            <a asp-controller="MemberDashboard"
+               asp-action="Index"
+               class="btn btn-light btn-lg">
+                Go to My Dashboard
+            </a>
+
+            <a asp-controller="MemberBookings"
+               asp-action="AvailableClasses"
+               class="btn btn-outline-light btn-lg">
+                Book a Class
+            </a>
+        }
+        else
+        {
+            <a asp-area="Identity"
+               asp-page="/Account/Login"
+               class="btn btn-light btn-lg">
+                Login
+            </a>
+
+            @if (Configuration.GetValue<bool>("Registration:Enabled")) {
+<a asp-area="Identity"
+               asp-page="/Account/Register"
+               class="btn btn-outline-light btn-lg">
+                Register
+            </a>
+}
+        }
+
+    </div>
+</div>
+
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-xl-3">
+        <div class="feature-card">
+            <div class="feature-icon">
+                🪪
+            </div>
+
+            <h5 class="feature-title">
+                Membership Management
+            </h5>
+
+            <p class="feature-text">
+                Create packages, sell memberships, manage payments and track active plans.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="feature-card">
+            <div class="feature-icon">
+                🗓️
+            </div>
+
+            <h5 class="feature-title">
+                Class Booking
+            </h5>
+
+            <p class="feature-text">
+                Members can book classes while the system checks capacity, schedule conflicts and active memberships.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="feature-card">
+            <div class="feature-icon">
+                ✅
+            </div>
+
+            <h5 class="feature-title">
+                Attendance Check-in
+            </h5>
+
+            <p class="feature-text">
+                Admins can check in booked members and convert bookings into real attendance records.
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="feature-card">
+            <div class="feature-icon">
+                🤖
+            </div>
+
+            <h5 class="feature-title">
+                Smart Assistant
+            </h5>
+
+            <p class="feature-text">
+                Members can ask about memberships, bookings, BMI, calories, water targets and fitness knowledge.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="row g-4 mb-4">
+
+    <div class="col-lg-8">
+        <div class="quick-panel">
+
+            <h3 class="section-title">
+                Main System Workflow
+            </h3>
+
+            <p class="section-subtitle">
+                The system connects admin operations and member self-service into one complete gym workflow.
+            </p>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <div class="workflow-step">
+                        <div class="step-number">1</div>
+
+                        <h5>
+                            Admin sets up the gym
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            Admin creates trainers, rooms, membership packages and class schedules.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="workflow-step">
+                        <div class="step-number">2</div>
+
+                        <h5>
+                            Member buys membership
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            Membership purchase creates membership, payment transaction and invoice records.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="workflow-step">
+                        <div class="step-number">3</div>
+
+                        <h5>
+                            Member books classes
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            The system validates membership status, class capacity and schedule conflicts.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="workflow-step">
+                        <div class="step-number">4</div>
+
+                        <h5>
+                            Admin tracks results
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            Admin checks attendance, views reports, exports Excel files and monitors performance.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="quick-panel">
+
+            <h3 class="section-title">
+                Quick Access
+            </h3>
+
+            <p class="section-subtitle">
+                Continue from your current role.
+            </p>
+
+            @if (User.Identity != null &&
+                 User.Identity.IsAuthenticated &&
+                 User.IsInRole("Admin"))
+            {
+                <a class="quick-link"
+                   asp-area="Admin"
+                   asp-controller="Reports"
+                   asp-action="Index">
+                    <span>Reports & Analytics</span>
+                    <strong>→</strong>
+                </a>
+
+                <a class="quick-link"
+                   asp-area="Admin"
+                   asp-controller="Memberships"
+                   asp-action="Index">
+                    <span>Membership Sales</span>
+                    <strong>→</strong>
+                </a>
+
+                <a class="quick-link"
+                   asp-area="Admin"
+                   asp-controller="Bookings"
+                   asp-action="Index">
+                    <span>Booking Management</span>
+                    <strong>→</strong>
+                </a>
+
+                <a class="quick-link"
+                   asp-area="Admin"
+                   asp-controller="Attendances"
+                   asp-action="Index">
+                    <span>Attendance Check-in</span>
+                    <strong>→</strong>
+                </a>
+            }
+            else if (User.Identity != null &&
+                     User.Identity.IsAuthenticated &&
+                     User.IsInRole("Member"))
+            {
+                <a class="quick-link"
+                   asp-controller="MemberDashboard"
+                   asp-action="Index">
+                    <span>My Dashboard</span>
+                    <strong>→</strong>
+                </a>
+
+                <a class="quick-link"
+                   asp-controller="MemberBookings"
+                   asp-action="AvailableClasses">
+                    <span>Book Classes</span>
+                    <strong>→</strong>
+                </a>
+
+                <a class="quick-link"
+                   asp-controller="MemberBMI"
+                   asp-action="Index">
+                    <span>Body Metrics Report</span>
+                    <strong>→</strong>
+                </a>
+
+                <a class="quick-link"
+                   asp-controller="MemberChatbot"
+                   asp-action="Index">
+                    <span>Smart Gym Assistant</span>
+                    <strong>→</strong>
+                </a>
+            }
+            else
+            {
+                <a class="quick-link"
+                   asp-area="Identity"
+                   asp-page="/Account/Login">
+                    <span>Login to your account</span>
+                    <strong>→</strong>
+                </a>
+
+                @if (Configuration.GetValue<bool>("Registration:Enabled")) {
+<a class="quick-link"
+                   asp-area="Identity"
+                   asp-page="/Account/Register">
+                    <span>Create a member account</span>
+                    <strong>→</strong>
+                </a>
+}
+            }
+
+        </div>
+    </div>
+
+</div>
+
+
+<div class="quick-panel">
+
+    <h3 class="section-title">
+        Fitness Intelligence
+    </h3>
+
+    <p class="section-subtitle">
+        Members can record body metrics and receive calculated fitness insights based on real personal data.
+    </p>
+
+    <div class="row g-3">
+
+        <div class="col-md-3">
+            <div class="border rounded-4 p-3 h-100">
+                <h5>BMI & Body Fat</h5>
+                <p class="text-muted mb-0">
+                    Track BMI, estimated body fat and lean body mass.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="border rounded-4 p-3 h-100">
+                <h5>BMR & TDEE</h5>
+                <p class="text-muted mb-0">
+                    Estimate resting energy and daily calorie needs.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="border rounded-4 p-3 h-100">
+                <h5>Macros</h5>
+                <p class="text-muted mb-0">
+                    Calculate protein, carbohydrates and fat targets.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="border rounded-4 p-3 h-100">
+                <h5>Water Target</h5>
+                <p class="text-muted mb-0">
+                    Estimate daily water needs from weight and activity level.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</div>

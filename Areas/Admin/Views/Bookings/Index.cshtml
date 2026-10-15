@@ -1,0 +1,80 @@
+@model IEnumerable<SmartGymManagement.Models.Booking>
+
+@{
+    ViewData["Title"] = "Bookings";
+}
+
+<h1>Bookings</h1>
+<partial name="_ListFilters" />
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<p>
+    <a asp-area="Admin" asp-controller="Bookings" asp-action="Create" class="btn btn-primary">
+        Create Booking
+    </a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Member</th>
+            <th>Email</th>
+            <th>Class</th>
+            <th>Trainer</th>
+            <th>Room</th>
+            <th>Class Time</th>
+            <th>Booking Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+@foreach (var item in Model)
+{
+        <tr>
+            <td>@item.Member?.User?.FullName</td>
+            <td>@item.Member?.User?.Email</td>
+            <td>@item.ClassSchedule?.ClassName</td>
+            <td>@item.ClassSchedule?.Trainer?.FullName</td>
+            <td>@item.ClassSchedule?.Room?.RoomName</td>
+            <td>
+                @item.ClassSchedule?.StartTime.ToString("dd/MM/yyyy HH:mm")
+                -
+                @item.ClassSchedule?.EndTime.ToString("HH:mm")
+            </td>
+            <td>@item.BookingDate.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>@item.Status</td>
+            <td>
+                <a asp-area="Admin" 
+                asp-controller="Bookings" 
+                asp-action="Details" 
+                asp-route-id="@item.BookingId">
+                Details
+            </a>
+
+                <span>|</span>
+
+                <a asp-area="Admin"
+                   asp-controller="Bookings"
+                   asp-action="Edit"
+                   asp-route-id="@item.BookingId">
+                Edit
+            </a>
+
+                @if (item.Status == SmartGymManagement.Enums.BookingStatus.Booked)
+                {
+                    <span>|</span>
+                    <a asp-area="Admin" asp-controller="Bookings" asp-action="Cancel" asp-route-id="@item.BookingId">Cancel</a>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

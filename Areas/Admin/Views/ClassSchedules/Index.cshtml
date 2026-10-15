@@ -1,0 +1,49 @@
+@model IEnumerable<SmartGymManagement.Models.ClassSchedule>
+
+    @{
+    ViewData["Title"] = "Class Schedules";
+    }
+
+    <h1>Class Schedules</h1>
+<partial name="_ListFilters" />
+
+    <p>
+        <a asp-area="Admin" asp-controller="ClassSchedules" asp-action="Create" class="btn btn-primary">
+            Create New Class
+        </a>
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Class Name</th>
+                <th>Trainer</th>
+                <th>Room</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Capacity</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+{
+            <tr>
+                <td>@item.ClassName</td>
+                <td>@item.Trainer?.FullName</td>
+                <td>@item.Room?.RoomName</td>
+                <td>@item.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.Capacity</td>
+                <td>@item.Status</td>
+                <td>
+                    <a asp-area="Admin" asp-controller="ClassSchedules" asp-action="Edit" asp-route-id="@item.ClassId">Edit</a> |
+                    <a asp-area="Admin" asp-controller="ClassSchedules" asp-action="Details" asp-route-id="@item.ClassId">Details</a> |
+                    <a asp-area="Admin" asp-controller="ClassSchedules" asp-action="Delete" asp-route-id="@item.ClassId">Delete</a>
+                </td>
+            </tr>
+}
+        </tbody>
+    </table>

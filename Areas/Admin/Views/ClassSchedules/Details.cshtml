@@ -1,0 +1,52 @@
+﻿@model SmartGymManagement.Models.ClassSchedule
+
+@{
+    ViewData["Title"] = "Class Details";
+}
+
+<h1>Class Details</h1>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Class Name</th>
+        <td>@Model.ClassName</td>
+    </tr>
+
+    <tr>
+        <th>Trainer</th>
+        <td>@Model.Trainer?.FullName</td>
+    </tr>
+
+    <tr>
+        <th>Room</th>
+        <td>@Model.Room?.RoomName</td>
+    </tr>
+
+    <tr>
+        <th>Start Time</th>
+        <td>@Model.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+
+    <tr>
+        <th>End Time</th>
+        <td>@Model.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+
+    <tr>
+        <th>Capacity</th>
+        <td>@Model.Capacity</td>
+    </tr>
+
+    <tr>
+        <th>Status</th>
+        <td>@Model.Status</td>
+    </tr>
+</table>
+
+<a asp-area="Admin" asp-controller="ClassSchedules" asp-action="Edit" asp-route-id="@Model.ClassId" class="btn btn-warning">
+    Edit
+</a>
+
+<a asp-area="Admin" asp-controller="ClassSchedules" asp-action="Index" class="btn btn-secondary">
+    Back
+</a>

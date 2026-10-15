@@ -1,0 +1,47 @@
+@model IEnumerable<SmartGymManagement.Models.Trainer>
+
+    @{
+    ViewData["Title"] = "Trainers";
+    }
+
+    <h1>Trainers</h1>
+<partial name="_ListFilters" />
+
+    <p>
+        <a asp-area="Admin" asp-controller="Trainers" asp-action="Create" class="btn btn-primary">
+            Create New Trainer
+        </a>
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Specialization</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Experience Years</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+{
+            <tr>
+                <td>@item.FullName</td>
+                <td>@item.Specialization</td>
+                <td>@item.Phone</td>
+                <td>@item.Email</td>
+                <td>@item.ExperienceYears</td>
+                <td>@item.Status</td>
+                <td>
+                    <a asp-area="Admin" asp-controller="Trainers" asp-action="Edit" asp-route-id="@item.TrainerId">Edit</a> |
+                    <a asp-area="Admin" asp-controller="Trainers" asp-action="Details" asp-route-id="@item.TrainerId">Details</a> |
+                    <a asp-area="Admin" asp-controller="Trainers" asp-action="Delete" asp-route-id="@item.TrainerId">Delete</a>
+                </td>
+            </tr>
+}
+        </tbody>
+    </table>

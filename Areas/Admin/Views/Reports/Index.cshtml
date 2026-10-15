@@ -1,0 +1,630 @@
+@model SmartGymManagement.ViewModels.AdminReportsViewModel
+
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Reports & Analytics";
+
+    string monthlyJson =
+        JsonSerializer.Serialize(
+            Model.MonthlyData.Select(x => new
+            {
+                month = x.MonthLabel,
+                revenue = x.Revenue,
+                bookings = x.Bookings,
+                attendances = x.Attendances
+            })
+        );
+
+    string topClassesJson =
+        JsonSerializer.Serialize(
+            Model.TopClasses.Select(x => new
+            {
+                className = x.ClassName,
+                bookingCount = x.BookingCount
+            })
+        );
+
+    string topPackagesJson =
+        JsonSerializer.Serialize(
+            Model.TopPackages.Select(x => new
+            {
+                packageName = x.PackageName,
+                purchaseCount = x.PurchaseCount
+            })
+        );
+}
+
+<form method="get" class="d-flex flex-wrap gap-2 mb-3">
+ <label>Từ ngày <input name="from" type="date" value="@Model.From.ToString("yyyy-MM-dd")" class="form-control" /></label>
+ <label>Đến ngày <input name="to" type="date" value="@Model.To.ToString("yyyy-MM-dd")" class="form-control" /></label>
+ <button type="submit" class="btn btn-primary align-self-end">Xem báo cáo</button>
+</form>
+<p>Kỳ báo cáo: @Model.From.ToString("dd/MM/yyyy") – @Model.To.ToString("dd/MM/yyyy"). Thu vào: @Model.GrossRevenue.ToString("N0") VND; hoàn tiền: @Model.Refunds.ToString("N0") VND. Các chỉ số hội viên/gói đang hoạt động là số liệu hiện tại.</p>
+<form asp-action="UpdateStatuses" method="post" class="mb-3"><button class="btn btn-outline-secondary" type="submit">Cập nhật gói hết hạn và booking vắng mặt</button></form>
+@if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+<style>
+    .report-page-title {
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .report-card {
+        height: 100%;
+        border: 1px solid #dee2e6;
+        background: #ffffff;
+        padding: 18px;
+    }
+
+    .report-card-value {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 3px;
+    }
+
+    .report-card-label {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .analytics-panel {
+        border: 1px solid #dee2e6;
+        background: #ffffff;
+        margin-bottom: 24px;
+    }
+
+    .analytics-panel-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: 800;
+        background: #f8f9fa;
+    }
+
+    .analytics-panel-body {
+        padding: 18px;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 350px;
+    }
+
+    .ranking-number {
+        display: inline-flex;
+        width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #adb5bd;
+        font-weight: 700;
+        margin-right: 10px;
+    }
+</style>
+
+
+<h1 class="report-page-title">
+    Reports & Analytics
+</h1>
+
+<div class="mb-4">
+    <a asp-area="Admin"
+       asp-controller="Reports"
+       asp-action="ExportAllReports" asp-route-from="@Model.From.ToString("yyyy-MM-dd")" asp-route-to="@Model.To.ToString("yyyy-MM-dd")"
+       class="btn btn-success">
+        Export All Reports to Excel
+    </a>
+</div>
+
+<p class="text-muted mb-4">
+    Overview of Smart Gym performance based on live system data.
+</p>
+
+
+<!-- SUMMARY CARDS -->
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-6 col-xl-3">
+        <div class="report-card">
+            <div class="report-card-value">
+                @Model.TotalMembers
+            </div>
+
+            <p class="report-card-label">
+                Total Members
+            </p>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+        <div class="report-card">
+            <div class="report-card-value">
+                @Model.ActiveMembers
+            </div>
+
+            <p class="report-card-label">
+                Active Members
+            </p>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+        <div class="report-card">
+            <div class="report-card-value">
+                @Model.ActiveMemberships
+            </div>
+
+            <p class="report-card-label">
+                Active Memberships
+            </p>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+        <div class="report-card">
+            <div class="report-card-value">
+                @Model.UpcomingClasses
+            </div>
+
+            <p class="report-card-label">
+                Upcoming Classes
+            </p>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+        <div class="report-card">
+            <div class="report-card-value">
+                @Model.TotalBookings
+            </div>
+
+            <p class="report-card-label">
+                Total Bookings
+            </p>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+        <div class="report-card">
+            <div class="report-card-value">
+                @Model.TotalAttendances
+            </div>
+
+            <p class="report-card-label">
+                Total Attendances
+            </p>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+        <div class="report-card">
+            <div class="report-card-value">
+                @Model.AttendanceRate.ToString("N2")%
+            </div>
+
+            <p class="report-card-label">
+                Attendance Rate
+            </p>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-xl-3">
+        <div class="report-card">
+            <div class="report-card-value">
+                @Model.TotalRevenue.ToString("N0")
+            </div>
+
+            <p class="report-card-label">
+                Net Revenue (VND)
+            </p>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- REVENUE CHART -->
+
+<section class="analytics-panel">
+
+    <div class="analytics-panel-header">
+        Revenue by Month
+    </div>
+
+    <div class="analytics-panel-body">
+
+        <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- BOOKING VS ATTENDANCE -->
+
+<section class="analytics-panel">
+
+    <div class="analytics-panel-header">
+        Bookings vs Actual Attendances
+    </div>
+
+    <div class="analytics-panel-body">
+
+        <div class="chart-container">
+            <canvas id="bookingAttendanceChart"></canvas>
+        </div>
+
+    </div>
+
+</section>
+
+
+<div class="row g-4">
+
+    <!-- TOP CLASSES -->
+
+    <div class="col-lg-6">
+
+        <section class="analytics-panel">
+
+            <div class="analytics-panel-header">
+                Top Popular Classes
+            </div>
+
+            <div class="analytics-panel-body">
+
+                @if (Model.TopClasses.Any())
+                {
+                    <div class="chart-container">
+                        <canvas id="topClassesChart"></canvas>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-0">
+                        No class booking data yet.
+                    </div>
+                }
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- TOP PACKAGES -->
+
+    <div class="col-lg-6">
+
+        <section class="analytics-panel">
+
+            <div class="analytics-panel-header">
+                Top Membership Packages
+            </div>
+
+            <div class="analytics-panel-body">
+
+                @if (Model.TopPackages.Any())
+                {
+                    <div class="chart-container">
+                        <canvas id="topPackagesChart"></canvas>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-0">
+                        No membership purchase data yet.
+                    </div>
+                }
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const monthlyData =
+                @Html.Raw(monthlyJson);
+
+            const topClasses =
+                @Html.Raw(topClassesJson);
+
+            const topPackages =
+                @Html.Raw(topPackagesJson);
+
+
+            // ---------------------------------------------
+            // REVENUE CHART
+            // ---------------------------------------------
+
+            const revenueCanvas =
+                document.getElementById(
+                    "revenueChart"
+                );
+
+            new Chart(
+                revenueCanvas,
+                {
+                    type: "line",
+
+                    data: {
+
+                        labels:
+                            monthlyData.map(
+                                item => item.month
+                            ),
+
+                        datasets: [
+                            {
+                                label: "Revenue (VND)",
+
+                                data:
+                                    monthlyData.map(
+                                        item => item.revenue
+                                    ),
+
+                                borderWidth: 3,
+
+                                pointRadius: 5,
+
+                                pointHoverRadius: 7,
+
+                                tension: 0.25
+                            }
+                        ]
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        interaction: {
+                            mode: "index",
+                            intersect: false
+                        },
+
+                        scales: {
+
+                            y: {
+                                beginAtZero: true
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+            // ---------------------------------------------
+            // BOOKING VS ATTENDANCE
+            // ---------------------------------------------
+
+            const comparisonCanvas =
+                document.getElementById(
+                    "bookingAttendanceChart"
+                );
+
+            new Chart(
+                comparisonCanvas,
+                {
+                    type: "line",
+
+                    data: {
+
+                        labels:
+                            monthlyData.map(
+                                item => item.month
+                            ),
+
+                        datasets: [
+                            {
+                                label: "Bookings",
+
+                                data:
+                                    monthlyData.map(
+                                        item =>
+                                            item.bookings
+                                    ),
+
+                                borderWidth: 3,
+
+                                pointRadius: 5,
+
+                                tension: 0.25
+                            },
+
+                            {
+                                label: "Attendances",
+
+                                data:
+                                    monthlyData.map(
+                                        item =>
+                                            item.attendances
+                                    ),
+
+                                borderWidth: 3,
+
+                                pointRadius: 5,
+
+                                tension: 0.25
+                            }
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        scales: {
+
+                            y: {
+                                beginAtZero: true
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+            // ---------------------------------------------
+            // TOP CLASSES
+            // ---------------------------------------------
+
+            if (topClasses.length > 0) {
+
+                const classCanvas =
+                    document.getElementById(
+                        "topClassesChart"
+                    );
+
+                new Chart(
+                    classCanvas,
+                    {
+                        type: "bar",
+
+                        data: {
+
+                            labels:
+                                topClasses.map(
+                                    item =>
+                                        item.className
+                                ),
+
+                            datasets: [
+                                {
+                                    label: "Bookings",
+
+                                    data:
+                                        topClasses.map(
+                                            item =>
+                                                item.bookingCount
+                                        ),
+
+                                    borderWidth: 1
+                                }
+                            ]
+
+                        },
+
+                        options: {
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+                            indexAxis: "y",
+
+                            scales: {
+
+                                x: {
+                                    beginAtZero: true
+                                }
+
+                            }
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            // ---------------------------------------------
+            // TOP MEMBERSHIP PACKAGES
+            // ---------------------------------------------
+
+            if (topPackages.length > 0) {
+
+                const packageCanvas =
+                    document.getElementById(
+                        "topPackagesChart"
+                    );
+
+                new Chart(
+                    packageCanvas,
+                    {
+                        type: "bar",
+
+                        data: {
+
+                            labels:
+                                topPackages.map(
+                                    item =>
+                                        item.packageName
+                                ),
+
+                            datasets: [
+                                {
+                                    label: "Purchases",
+
+                                    data:
+                                        topPackages.map(
+                                            item =>
+                                                item.purchaseCount
+                                        ),
+
+                                    borderWidth: 1
+                                }
+                            ]
+
+                        },
+
+                        options: {
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+                            indexAxis: "y",
+
+                            scales: {
+
+                                x: {
+                                    beginAtZero: true
+                                }
+
+                            }
+
+                        }
+
+                    }
+                );
+
+            }
+
+        }
+    );
+
+</script>

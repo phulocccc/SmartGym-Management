@@ -1,0 +1,57 @@
+@model SmartGymManagement.Models.ClassSchedule
+
+@{
+    ViewData["Title"] = "Delete Class";
+}
+
+<h1>Delete Class</h1>
+
+<h4>Are you sure you want to cancel this class schedule?</h4>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+<table class="table table-bordered">
+    <tr>
+        <th>Class Name</th>
+        <td>@Model.ClassName</td>
+    </tr>
+
+    <tr>
+        <th>Trainer</th>
+        <td>@Model.Trainer?.FullName</td>
+    </tr>
+
+    <tr>
+        <th>Room</th>
+        <td>@Model.Room?.RoomName</td>
+    </tr>
+
+    <tr>
+        <th>Start Time</th>
+        <td>@Model.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+
+    <tr>
+        <th>End Time</th>
+        <td>@Model.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+
+    <tr>
+        <th>Capacity</th>
+        <td>@Model.Capacity</td>
+    </tr>
+
+    <tr>
+        <th>Status</th>
+        <td>@Model.Status</td>
+    </tr>
+</table>
+
+<form asp-area="Admin" asp-controller="ClassSchedules" asp-action="Delete" method="post">
+    <input type="hidden" asp-for="ClassId" />
+
+    <button type="submit" class="btn btn-danger">Hủy lớp</button>
+
+    <a asp-area="Admin" asp-controller="ClassSchedules" asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
+</form>

@@ -1,0 +1,89 @@
+﻿@model IEnumerable<SmartGymManagement.ViewModels.AvailableClassViewModel>
+
+@{
+    ViewData["Title"] = "Available Classes";
+}
+
+<h1>Available Classes</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<p>
+    <a asp-controller="MemberBookings" asp-action="MyBookings" class="btn btn-secondary">
+        My Bookings
+    </a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Class</th>
+            <th>Trainer</th>
+            <th>Room</th>
+            <th>Time</th>
+            <th>Capacity</th>
+            <th>Booked</th>
+            <th>Remaining</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+@foreach (var item in Model)
+{
+        <tr>
+            <td>@item.ClassName</td>
+            <td>@item.TrainerName</td>
+            <td>@item.RoomName</td>
+            <td>
+                @item.StartTime.ToString("dd/MM/yyyy HH:mm")
+                -
+                @item.EndTime.ToString("HH:mm")
+            </td>
+            <td>@item.Capacity</td>
+            <td>@item.BookedCount</td>
+            <td>@item.RemainingSlots</td>
+            <td>
+                @if (item.CanBook)
+                {
+                    <span class="badge bg-success">Available</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">@item.CannotBookReason</span>
+                }
+            </td>
+            <td>
+                @if (item.CanBook)
+                {
+                    <form asp-controller="MemberBookings" asp-action="Book" method="post">
+                        <input type="hidden" name="classId" value="@item.ClassId" />
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            Book
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <button class="btn btn-secondary btn-sm" disabled>
+                        Cannot Book
+                    </button>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

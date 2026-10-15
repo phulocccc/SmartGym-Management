@@ -1,0 +1,90 @@
+@model SmartGymManagement.ViewModels.MemberFormViewModel
+@using SmartGymManagement.Enums
+
+@{
+    ViewData["Title"] = "Edit Member";
+}
+
+<h1>Edit Member</h1>
+
+<form asp-area="Admin" asp-controller="Members" asp-action="Edit" method="post">
+    <input type="hidden" asp-for="MemberId" />
+    <input type="hidden" asp-for="UserId" />
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="FullName" class="control-label">Full Name</label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Email" class="control-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="PhoneNumber" class="control-label">Phone Number</label>
+        <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="DateOfBirth" class="control-label">Date Of Birth</label>
+        <input asp-for="DateOfBirth"
+       class="form-control"
+       type="date"
+       asp-format="{0:yyyy-MM-dd}"
+       max="@DateTime.Today.AddYears(-6).ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Gender" class="control-label">Gender</label>
+        <select asp-for="Gender" class="form-control">
+            <option value="">-- Select Gender --</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+        <span asp-validation-for="Gender" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Address" class="control-label">Address</label>
+        <input asp-for="Address" class="form-control" />
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="EmergencyContact" class="control-label">Emergency Contact</label>
+       <input asp-for="EmergencyContact"
+       class="form-control"
+       type="tel"
+       pattern="[0-9]{9,15}" />
+        <span asp-validation-for="EmergencyContact" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Status" class="control-label">Status</label>
+        <select asp-for="Status" asp-items="Html.GetEnumSelectList<MemberStatus>()" class="form-control"></select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <div class="form-group form-check mb-3">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label">Active Account</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+
+    <a asp-area="Admin" asp-controller="Members" asp-action="Index" class="btn btn-secondary">
+        Back
+    </a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

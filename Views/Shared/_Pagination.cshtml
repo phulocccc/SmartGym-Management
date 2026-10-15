@@ -1,0 +1,15 @@
+@using SmartGymManagement.Services
+@if (ViewData["Pagination"] is PaginationInfo paging)
+{
+    string PageUrl(int page)
+    {
+        var values = Context.Request.Query.ToDictionary(k => k.Key, k => k.Value.ToString());
+        values["page"] = page.ToString();
+        return Context.Request.PathBase + Context.Request.Path + "?" + string.Join("&", values.Select(k => Uri.EscapeDataString(k.Key) + "=" + Uri.EscapeDataString(k.Value)));
+    }
+    <nav aria-label="Phân trang" class="d-flex align-items-center gap-3 my-3">
+        @if (paging.Page > 1) { <a class="btn btn-outline-secondary" href="@PageUrl(paging.Page - 1)">Trước</a> }
+        <span>Trang @paging.Page / @paging.TotalPages — @paging.TotalItems bản ghi</span>
+        @if (paging.Page < paging.TotalPages) { <a class="btn btn-outline-secondary" href="@PageUrl(paging.Page + 1)">Sau</a> }
+    </nav>
+}

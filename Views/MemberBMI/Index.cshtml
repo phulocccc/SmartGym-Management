@@ -1,0 +1,65 @@
+@model IEnumerable<SmartGymManagement.Models.BMIRecord>
+
+@{
+    ViewData["Title"] = "My BMI Records";
+}
+
+<h1>My BMI Records</h1>
+<a asp-controller="MemberProfile" asp-action="Index" class="btn btn-outline-secondary mb-3">Cập nhật hồ sơ (ngày sinh, giới tính)</a>
+@if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div> }
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<p>
+    <a asp-controller="MemberBMI"
+       asp-action="Create"
+       class="btn btn-primary">
+        Add BMI Record
+    </a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Recorded At</th>
+            <th>Height</th>
+            <th>Weight</th>
+            <th>BMI</th>
+            <th>Category</th>
+            <th>Note</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+@foreach (var item in Model)
+{
+        <tr>
+            <td>@item.RecordedAt.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>@item.HeightCm.ToString("N2") cm</td>
+            <td>@item.WeightKg.ToString("N2") kg</td>
+            <td>@item.BMIValue.ToString("N2")</td>
+            <td>@item.Category</td>
+            <td>@item.Note</td>
+            <td>
+                <a asp-controller="MemberBMI"
+                   asp-action="Details"
+                   asp-route-id="@item.BMIRecordId">
+                    Details
+                </a>
+                |
+                <a asp-controller="MemberBMI"
+                   asp-action="Delete"
+                   asp-route-id="@item.BMIRecordId">
+                    Delete
+                </a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

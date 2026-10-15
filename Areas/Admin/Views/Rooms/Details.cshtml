@@ -1,0 +1,32 @@
+﻿@model SmartGymManagement.Models.Room
+
+@{
+    ViewData["Title"] = "Room Details";
+}
+
+<h1>Room Details</h1>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Room Name</th>
+        <td>@Model.RoomName</td>
+    </tr>
+
+    <tr>
+        <th>Capacity</th>
+        <td>@Model.Capacity</td>
+    </tr>
+
+    <tr>
+        <th>Active</th>
+        <td>@Model.IsActive</td>
+    </tr>
+</table>
+
+<a asp-area="Admin" asp-controller="Rooms" asp-action="Edit" asp-route-id="@Model.RoomId" class="btn btn-warning">
+    Edit
+</a>
+
+<a asp-area="Admin" asp-controller="Rooms" asp-action="Index" class="btn btn-secondary">
+    Back
+</a>

@@ -1,0 +1,44 @@
+@model IEnumerable<SmartGymManagement.Models.MembershipPackage>
+
+    @{
+    ViewData["Title"] = "Membership Packages";
+    }
+
+    <h1>Membership Packages</h1>
+<partial name="_ListFilters" />
+
+    <p>
+        <a asp-area="Admin" asp-controller="MembershipPackages" asp-action="Create" class="btn btn-primary">
+            Create New Package
+        </a>
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Package Name</th>
+                <th>Duration Days</th>
+                <th>Price</th>
+                <th>Active</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+{
+            <tr>
+                <td>@item.PackageName</td>
+                <td>@item.DurationDays</td>
+                <td>@item.Price.ToString("N0") VND</td>
+                <td>@item.IsActive</td>
+                <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td>
+                    <a asp-area="Admin" asp-controller="MembershipPackages" asp-action="Edit" asp-route-id="@item.PackageId">Edit</a> |
+                    <a asp-area="Admin" asp-controller="MembershipPackages" asp-action="Details" asp-route-id="@item.PackageId">Details</a> |
+                    <a asp-area="Admin" asp-controller="MembershipPackages" asp-action="Delete" asp-route-id="@item.PackageId">Delete</a>>
+                </td>
+            </tr>
+}
+        </tbody>
+    </table>

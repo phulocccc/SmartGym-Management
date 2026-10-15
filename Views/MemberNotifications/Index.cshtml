@@ -1,0 +1,8 @@
+@model List<SmartGymManagement.Models.Notification>
+@{ ViewData["Title"] = "Thông báo"; }
+<h1>Thông báo</h1>
+@if (Model.Count == 0) { <p>Chưa có thông báo.</p> }
+@foreach (var notification in Model)
+{
+ <article class="card mb-3"><div class="card-body"><h2 class="h5">@notification.Title</h2><p>@notification.Message</p><small>@notification.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small></div></article>
+}

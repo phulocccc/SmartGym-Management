@@ -1,0 +1,61 @@
+﻿@model SmartGymManagement.ViewModels.MembershipPurchaseViewModel
+@using SmartGymManagement.Enums
+
+@{
+    ViewData["Title"] = "Purchase Membership";
+}
+
+<h1>Purchase Membership</h1>
+
+<form asp-area="Admin" asp-controller="Memberships" asp-action="Purchase" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="MemberId" class="control-label">Member</label>
+        <select asp-for="MemberId" asp-items="ViewBag.MemberId" class="form-control">
+            <option value="">-- Select Member --</option>
+        </select>
+        <span asp-validation-for="MemberId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="PackageId" class="control-label">Membership Package</label>
+        <select asp-for="PackageId" asp-items="ViewBag.PackageId" class="form-control">
+            <option value="">-- Select Package --</option>
+        </select>
+        <span asp-validation-for="PackageId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="StartDate" class="control-label">Start Date</label>
+        <input asp-for="StartDate" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
+        <span asp-validation-for="StartDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="PaymentMethod" class="control-label">Payment Method</label>
+        <select asp-for="PaymentMethod" asp-items="Html.GetEnumSelectList<PaymentMethod>()" class="form-control"></select>
+        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Note" class="control-label">Note</label>
+        <textarea asp-for="Note" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Note" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="PaymentConfirmed" class="form-check-input" />
+        <label asp-for="PaymentConfirmed">Đã nhận tiền mặt (chỉ xác nhận sau khi thu tiền)</label>
+    </div>
+    <p class="text-muted">VNPay/Visa được ghi nhận chờ thanh toán. Hệ thống chưa kết nối cổng thanh toán; Admin xác nhận giao dịch đã nhận tiền ở trang chi tiết.</p>
+    <button type="submit" class="btn btn-primary">Create Purchase</button>
+
+    <a asp-area="Admin" asp-controller="Memberships" asp-action="Index" class="btn btn-secondary">
+        Back
+    </a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

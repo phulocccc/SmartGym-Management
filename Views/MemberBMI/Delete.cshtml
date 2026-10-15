@@ -1,0 +1,55 @@
+@model SmartGymManagement.Models.BMIRecord
+
+@{
+    ViewData["Title"] = "Delete BMI Record";
+}
+
+<h1>Delete BMI Record</h1>
+
+<h4>Are you sure you want to delete this BMI record?</h4>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Recorded At</th>
+        <td>@Model.RecordedAt.ToString("dd/MM/yyyy HH:mm")</td>
+    </tr>
+
+    <tr>
+        <th>Height</th>
+        <td>@Model.HeightCm.ToString("N2") cm</td>
+    </tr>
+
+    <tr>
+        <th>Weight</th>
+        <td>@Model.WeightKg.ToString("N2") kg</td>
+    </tr>
+
+    <tr>
+        <th>BMI</th>
+        <td>@Model.BMIValue.ToString("N2")</td>
+    </tr>
+
+    <tr>
+        <th>Category</th>
+        <td>@Model.Category</td>
+    </tr>
+</table>
+
+<form asp-controller="MemberBMI"
+      asp-action="Delete" asp-route-id="@Model.BMIRecordId"
+      method="post">
+
+    <input type="hidden"
+           asp-for="BMIRecordId" />
+
+    <button type="submit"
+            class="btn btn-danger">
+        Delete
+    </button>
+
+    <a asp-controller="MemberBMI"
+       asp-action="Index"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+</form>

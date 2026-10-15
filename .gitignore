@@ -1,0 +1,48 @@
+# Visual Studio and local settings
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build output
+**/bin/
+**/obj/
+artifacts/
+TestResults/
+*.log
+
+# Local databases and backups
+DatabaseBackups/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.mdf
+*.ndf
+*.ldf
+*.bak
+*.trn
+
+# Secrets and machine-specific configuration
+.env
+.env.*
+!.env.example
+secrets.json
+appsettings.Local.json
+appsettings.*.Local.json
+*.pfx
+*.p12
+*.key
+
+# Generated local audit and test evidence
+disk-audit/
+docs/TEST_RUN_*
+docs/TESTCASE_RESULTS_*
+
+# OS files
+Thumbs.db
+.DS_Store

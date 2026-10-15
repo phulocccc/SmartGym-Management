@@ -1,0 +1,55 @@
+@model IEnumerable<SmartGymManagement.Models.Membership>
+
+@{
+    ViewData["Title"] = "Memberships";
+}
+
+<h1>Memberships</h1>
+<partial name="_ListFilters" />
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<p>
+    <a asp-area="Admin" asp-controller="Memberships" asp-action="Purchase" class="btn btn-primary">
+        Purchase Membership
+    </a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Member</th>
+            <th>Email</th>
+            <th>Package</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+@foreach (var item in Model)
+{
+        <tr>
+            <td>@item.Member?.User?.FullName</td>
+            <td>@item.Member?.User?.Email</td>
+            <td>@(item.PurchasedPackageName ?? item.Package?.PackageName)</td>
+            <td>@item.StartDate.ToString("dd/MM/yyyy")</td>
+            <td>@item.EndDate.ToString("dd/MM/yyyy")</td>
+            <td>@item.Package?.Price.ToString("N0") VND</td>
+            <td>@SmartGymManagement.Services.MembershipDisplay.Status(item)</td>
+            <td>
+                <a asp-area="Admin" asp-controller="Memberships" asp-action="Details" asp-route-id="@item.MembershipId">Details</a> |
+                <a asp-area="Admin" asp-controller="Memberships" asp-action="Cancel" asp-route-id="@item.MembershipId">Cancel</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

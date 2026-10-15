@@ -1,0 +1,7 @@
+@model SmartGymManagement.ViewModels.BookingQrViewModel
+@{ ViewData["Title"] = "QR điểm danh"; }
+<h1>QR điểm danh — @Model.ClassName</h1>
+<p>Đưa QR cho Admin quét. Mã có hiệu lực 10 phút; tải lại trang để cấp mã mới. Điểm danh chỉ được ghi nhận sau khi Admin xác nhận.</p>
+<img src="data:image/png;base64,@Model.ImageBase64" alt="QR điểm danh lớp học" width="300" height="300" />
+<details class="my-3"><summary>Mã dự phòng khi không dùng camera</summary><textarea class="form-control" readonly rows="4" aria-label="Mã điểm danh">@Model.Token</textarea></details>
+<a asp-action="MyBookings" class="btn btn-secondary">Quay lại</a>
