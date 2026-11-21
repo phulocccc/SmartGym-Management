@@ -6,10 +6,6 @@
 
 <h1>Members</h1>
 <partial name="_ListFilters" />
-@if (TempData["AccountSetupLink"] is string setupLink)
-{
- <div class="alert alert-info">Liên kết đặt mật khẩu (chỉ chuyển cho hội viên qua kênh bảo mật): <a href="@setupLink">Thiết lập mật khẩu</a></div>
-}
 
 @if (TempData["SuccessMessage"] != null)
 {

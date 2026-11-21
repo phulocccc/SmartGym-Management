@@ -1,6 +1,4 @@
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
 using SmartGymManagement.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -78,6 +76,8 @@ namespace SmartGymManagement.Areas.Admin.Controllers
         {
             await using var transaction = await _context.Database.BeginTransactionAsync();
             await _reservations.LockAsync();
+            if (string.IsNullOrWhiteSpace(model.Password))
+                ModelState.AddModelError(nameof(model.Password), "Mật khẩu ban đầu là bắt buộc.");
             await ValidateMemberAsync(model, null);
 
             if (ModelState.IsValid)
@@ -93,7 +93,7 @@ namespace SmartGymManagement.Areas.Admin.Controllers
                     IsActive = model.IsActive
                 };
 
-                var createUserResult = await _userManager.CreateAsync(user);
+                var createUserResult = await _userManager.CreateAsync(user, model.Password!);
 
                 if (!createUserResult.Succeeded)
                 {
@@ -143,10 +143,7 @@ namespace SmartGymManagement.Areas.Admin.Controllers
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-                TempData["AccountSetupLink"] = Url.Action("Index", "AccountSetup", new { area = "", userId = user.Id, token = encodedToken });
-                TempData["SuccessMessage"] = "Đã tạo hội viên. Chuyển liên kết thiết lập mật khẩu riêng cho hội viên qua kênh bảo mật.";
+                TempData["SuccessMessage"] = "Đã tạo hội viên. Hội viên đăng nhập bằng email và mật khẩu ban đầu vừa đặt.";
 
                 return RedirectToAction(nameof(Index));
             }
@@ -294,21 +291,6 @@ namespace SmartGymManagement.Areas.Admin.Controllers
                 await _context.SaveChangesAsync();
             }
             await transaction.CommitAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> IssueSetupLink(int id)
-        {
-            var member = await _context.Members.Include(m => m.User).SingleOrDefaultAsync(m => m.MemberId == id);
-            if (member?.User == null) return NotFound();
-            if (!member.User.IsActive || await _userManager.HasPasswordAsync(member.User))
-                return BadRequest("Tài khoản không hoạt động hoặc đã có mật khẩu.");
-            var result = await _userManager.UpdateSecurityStampAsync(member.User);
-            if (!result.Succeeded) return BadRequest("Không thể cấp lại liên kết lúc này.");
-            var token = await _userManager.GeneratePasswordResetTokenAsync(member.User);
-            TempData["AccountSetupLink"] = Url.Action("Index", "AccountSetup", new { area = "", userId = member.UserId,
-                token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token)) });
             return RedirectToAction(nameof(Index));
         }
 

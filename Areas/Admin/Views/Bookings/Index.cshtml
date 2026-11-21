@@ -14,11 +14,6 @@
     </div>
 }
 
-<p>
-    <a asp-area="Admin" asp-controller="Bookings" asp-action="Create" class="btn btn-primary">
-        Create Booking
-    </a>
-</p>
 
 <table class="table table-bordered table-striped">
     <thead>
@@ -57,15 +52,6 @@
                 asp-action="Details" 
                 asp-route-id="@item.BookingId">
                 Details
-            </a>
-
-                <span>|</span>
-
-                <a asp-area="Admin"
-                   asp-controller="Bookings"
-                   asp-action="Edit"
-                   asp-route-id="@item.BookingId">
-                Edit
             </a>
 
                 @if (item.Status == SmartGymManagement.Enums.BookingStatus.Booked)

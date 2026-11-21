@@ -43,31 +43,6 @@ namespace SmartGymManagement.Areas.Admin.Controllers
             return View(attendances);
         }
 
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var attendance = await _context.Attendances
-                .Include(a => a.Member)
-                    .ThenInclude(m => m!.User)
-                .Include(a => a.Booking)
-                .Include(a => a.ClassSchedule)
-                    .ThenInclude(c => c!.Trainer)
-                .Include(a => a.ClassSchedule)
-                    .ThenInclude(c => c!.Room)
-                .FirstOrDefaultAsync(a => a.AttendanceId == id);
-
-            if (attendance == null)
-            {
-                return NotFound();
-            }
-
-            return View(attendance);
-        }
-
         public async Task<IActionResult> CheckIn()
         {
             await LoadBookingsAsync();
@@ -126,7 +101,7 @@ namespace SmartGymManagement.Areas.Admin.Controllers
 
                 TempData["SuccessMessage"] = "Check-in completed successfully.";
 
-                return RedirectToAction(nameof(Details), new { id = attendance.AttendanceId });
+                return RedirectToAction(nameof(Index));
             }
             catch
             {

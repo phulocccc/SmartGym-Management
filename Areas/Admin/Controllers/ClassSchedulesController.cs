@@ -257,60 +257,6 @@ namespace SmartGymManagement.Areas.Admin.Controllers
             });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAvailableTrainers(DateTime startTime, DateTime endTime, int? classId)
-        {
-            if (endTime <= startTime)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = "End time must be after start time."
-                });
-            }
-
-            var duration = endTime - startTime;
-
-            if (duration.TotalHours > 3)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message = "A class session cannot be longer than 3 hours."
-                });
-            }
-
-            var bookedTrainerIds = await _context.ClassSchedules
-                .Where(c =>
-                    c.ClassId != classId &&
-                    c.Status != ClassStatus.Cancelled &&
-                    startTime < c.EndTime &&
-                    endTime > c.StartTime
-                )
-                .Select(c => c.TrainerId)
-                .Distinct()
-                .ToListAsync();
-
-            var availableTrainers = await _context.Trainers
-                .Where(t =>
-                    t.Status == TrainerStatus.Active &&
-                    !bookedTrainerIds.Contains(t.TrainerId)
-                )
-                .OrderBy(t => t.FullName)
-                .Select(t => new
-                {
-                    trainerId = t.TrainerId,
-                    fullName = t.FullName + " - " + t.Specialization
-                })
-                .ToListAsync();
-
-            return Json(new
-            {
-                success = true,
-                trainers = availableTrainers
-            });
-        }
-
         private async Task CancelClassBookingsAsync(int classId)
         {
             var bookings = await _context.Bookings.Where(b => b.ClassId == classId && b.Status == BookingStatus.Booked).ToListAsync();

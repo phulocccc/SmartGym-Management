@@ -74,16 +74,6 @@ public class MemberChatbotController(ApplicationDbContext db, UserManager<Applic
         }
     }
 
-    [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> ClearHistory()
-    {
-        var member = await GetMemberAsync();
-        if (member == null) return NotFound();
-        await db.ChatbotMessages.Where(c => c.MemberId == member.MemberId).ExecuteDeleteAsync();
-        TempData["SuccessMessage"] = "Đã xóa lịch sử hội thoại.";
-        return RedirectToAction(nameof(Index));
-    }
-
     private async Task<Member?> GetMemberAsync()
     {
         var user = await users.GetUserAsync(User);

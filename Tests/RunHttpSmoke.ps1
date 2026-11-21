@@ -25,24 +25,20 @@ function Probe([string]$Id, [string]$Path, [int]$Expected, [string]$Method = 'GE
 }
 try {
     Probe 'AUTH-01-home' '/' 200 'GET' '' 'SmartGym'
-    Probe 'AUTH-01-privacy' '/Home/Privacy' 200 'GET' '' 'Privacy'
     Probe 'LOGIN-form' '/Identity/Account/Login' 200 'GET' '' '__RequestVerificationToken'
     $tokenMatch = [regex]::Match($script:LastBody, 'name="__RequestVerificationToken"[^>]*value="([^"]+)"')
     if (!$tokenMatch.Success) { throw 'Login form did not contain an anti-forgery token.' }
     $token = [System.Net.WebUtility]::HtmlDecode($tokenMatch.Groups[1].Value)
     $encodedToken = [uri]::EscapeDataString($token)
-    Probe 'MEM-10-get' '/Identity/Account/Register' 404
-    Probe 'MEM-10-post' '/Identity/Account/Register' 404 'POST' "__RequestVerificationToken=$encodedToken"
-    Probe 'AUTH-08-missing' '/AccountSetup' 400 'POST' 'UserId=invalid&Token=invalid&Password=invalid'
-    Probe 'AUTH-08-invalid' '/AccountSetup' 400 'POST' '__RequestVerificationToken=invalid'
-    Probe 'SETUP-invalid-form' '/AccountSetup' 200 'POST' "__RequestVerificationToken=$encodedToken" 'validation-summary-errors'
+    Probe 'MEM-10-get' '/Identity/Account/Register' 200 'GET' '' 'Input.Password'
+    # Cac action da rut gon phai tra 404
+    foreach ($removed in @('/Home/Privacy','/AccountSetup','/MemberNotifications','/Admin/Rooms/Details/1','/Admin/Trainers/Details/1','/Admin/MembershipPackages/Details/1','/Admin/Attendances/Details/1','/Admin/Bookings/Create','/Admin/Bookings/Edit/1','/MemberBMI/Delete/1','/Admin/ClassSchedules/GetAvailableTrainers')) { Probe "REMOVED-$removed" $removed 404 }
     $adminPaths = @('Reports','Members','Trainers','Rooms','MembershipPackages','Memberships','ClassSchedules','Bookings','Attendances')
     foreach ($controller in $adminPaths) { Probe "AUTH-05-admin-$controller" "/Admin/$controller" 302 }
-    $memberPaths = @('MemberDashboard','MemberProfile','MemberNotifications','MemberBMI','MemberChatbot','MemberBookings/AvailableClasses','MemberBookings/MyBookings')
+    $memberPaths = @('MemberDashboard','MemberProfile','MemberBMI','MemberChatbot','MemberBookings/AvailableClasses','MemberBookings/MyBookings')
     foreach ($controller in $memberPaths) { Probe "AUTH-05-member-$controller" "/$controller" 302 }
     Probe 'AUTH-05-export' '/Admin/Reports/ExportAllReports' 302
     Probe 'AUTH-05-book-post' '/MemberBookings/Book' 302 'POST' 'classId=1'
-    Probe 'AUTH-05-clear-post' '/MemberChatbot/ClearHistory' 302 'POST' ''
     Probe 'AUTH-05-status-post' '/Admin/Reports/UpdateStatuses' 302 'POST' ''
     Probe 'NOTFOUND' '/NoSuchControllerForTest' 404
     Probe 'STATIC-css' '/css/site.css' 200
@@ -50,11 +46,11 @@ try {
     # This tests account rate limiting after all other account requests.
     $statuses = @()
     for ($i=0; $i -lt 35; $i++) {
-        $response = $client.GetAsync($BaseUrl + '/AccountSetup?userId=test&token=test').GetAwaiter().GetResult()
+        $response = $client.GetAsync($BaseUrl + '/Identity/Account/Login').GetAwaiter().GetResult()
         $statuses += [int]$response.StatusCode
         $response.Dispose()
     }
-    $results.Add([pscustomobject]@{Id='AUTH-10-rate';Method='GET x35';Path='/AccountSetup';Expected=429;Actual=($statuses -join ',');Location='';Pass=($statuses -contains 429 -and !($statuses -contains 500))})
+    $results.Add([pscustomobject]@{Id='AUTH-10-rate';Method='GET x35';Path='/Identity/Account/Login';Expected=429;Actual=($statuses -join ',');Location='';Pass=($statuses -contains 429 -and !($statuses -contains 500))})
     ConvertTo-Json -InputObject $results.ToArray() -Depth 4 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
     $failed = @($results | Where-Object { !$_.Pass })
     Write-Output "HTTP checks: $($results.Count); passed: $($results.Count-$failed.Count); failed: $($failed.Count)"

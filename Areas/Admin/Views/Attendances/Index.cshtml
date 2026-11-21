@@ -33,7 +33,6 @@
             <th>Room</th>
             <th>Check-in Time</th>
             <th>Method</th>
-            <th>Actions</th>
         </tr>
     </thead>
 
@@ -48,14 +47,6 @@
             <td>@item.ClassSchedule?.Room?.RoomName</td>
             <td>@item.CheckInTime.ToString("dd/MM/yyyy HH:mm")</td>
             <td>@item.Method</td>
-            <td>
-                <a asp-area="Admin"
-                   asp-controller="Attendances"
-                   asp-action="Details"
-                   asp-route-id="@item.AttendanceId">
-                    Details
-                </a>
-            </td>
         </tr>
 }
     </tbody>

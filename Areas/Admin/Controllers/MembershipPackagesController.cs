@@ -32,24 +32,6 @@ namespace SmartGymManagement.Areas.Admin.Controllers
             return View(packages);
         }
 
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var package = await _context.MembershipPackages
-                .FirstOrDefaultAsync(m => m.PackageId == id);
-
-            if (package == null)
-            {
-                return NotFound();
-            }
-
-            return View(package);
-        }
-
         public IActionResult Create()
         {
             return View();

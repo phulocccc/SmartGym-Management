@@ -166,7 +166,11 @@ namespace SmartGymManagement.Controllers
                 NoShowCount = noShowCount,
 
                 UpcomingBookings = upcomingBookings,
-                RecentAttendances = recentAttendances
+                RecentAttendances = recentAttendances,
+                RecentNotifications = await _context.Notifications.AsNoTracking()
+                    .Where(n => n.MemberId == member.MemberId)
+                    .OrderByDescending(n => n.CreatedAt).ThenByDescending(n => n.NotificationId)
+                    .Take(5).ToListAsync()
             };
 
             return View(model);

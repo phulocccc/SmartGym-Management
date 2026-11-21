@@ -35,6 +35,9 @@
         public List<MemberDashboardBookingItemViewModel> UpcomingBookings { get; set; }
             = new List<MemberDashboardBookingItemViewModel>();
 
+        public List<SmartGymManagement.Models.Notification> RecentNotifications { get; set; }
+            = new List<SmartGymManagement.Models.Notification>();
+
         public List<MemberDashboardAttendanceItemViewModel> RecentAttendances { get; set; }
             = new List<MemberDashboardAttendanceItemViewModel>();
     }

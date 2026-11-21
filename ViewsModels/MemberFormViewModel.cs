@@ -20,6 +20,10 @@ namespace SmartGymManagement.ViewModels
         [RegularExpression(@"^[A-Za-z0-9._%+-]+@smartgym\.com$", ErrorMessage = "Email must end with @smartgym.com.")]
         public string Email { get; set; } = string.Empty;
 
+        [DataType(DataType.Password)]
+        [StringLength(128, MinimumLength = 10, ErrorMessage = "Password must be at least 10 characters.")]
+        public string? Password { get; set; }
+
         [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters.")]
         public string? PhoneNumber { get; set; }
 

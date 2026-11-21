@@ -152,12 +152,3 @@ else
   <button class="btn btn-success" type="submit">Xác nhận thanh toán</button>
  </form>
 }
-@if (Model.Status == SmartGymManagement.Enums.MembershipStatus.Cancelled)
-{
- <h3>Ghi nhận hoàn tiền</h3>
- <p>Chỉ xác nhận sau khi đã hoàn toàn bộ tiền thực tế. Hệ thống không tự chuyển tiền.</p>
- <form asp-action="ConfirmRefund" asp-route-id="@Model.MembershipId" method="post">
-  <input name="reference" maxlength="100" required class="form-control mb-2" placeholder="Mã biên nhận hoàn tiền" />
-  <button class="btn btn-warning" type="submit">Xác nhận đã hoàn tiền</button>
- </form>
-}

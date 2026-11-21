@@ -31,11 +31,10 @@
 
     <div class="form-group mb-3">
         <label asp-for="TrainerId" class="control-label">Trainer</label>
-        <select asp-for="TrainerId" class="form-control" id="TrainerId">
+        <select asp-for="TrainerId" asp-items="ViewBag.TrainerId" class="form-control" id="TrainerId">
             <option value="">-- Select Trainer --</option>
         </select>
         <span asp-validation-for="TrainerId" class="text-danger"></span>
-        <div id="trainerAvailabilityMessage" class="text-danger mt-1"></div>
     </div>
 
     <div class="form-group mb-3">
@@ -74,59 +73,11 @@
             const startInput = document.getElementById("StartTime");
             const endInput = document.getElementById("EndTime");
 
-            const trainerSelect = document.getElementById("TrainerId");
-            const trainerMessageDiv = document.getElementById("trainerAvailabilityMessage");
-
             const roomSelect = document.getElementById("RoomId");
             const roomMessageDiv = document.getElementById("roomAvailabilityMessage");
 
             const currentClassId = "@Model.ClassId";
-            const currentTrainerId = "@Model.TrainerId";
             const currentRoomId = "@Model.RoomId";
-
-            async function loadAvailableTrainers() {
-                const startTime = startInput.value;
-                const endTime = endInput.value;
-
-                trainerSelect.innerHTML = "";
-                trainerMessageDiv.textContent = "";
-
-                if (!startTime || !endTime) {
-                    trainerSelect.innerHTML = '<option value="">-- Select Start Time and End Time first --</option>';
-                    return;
-                }
-
-                const url = `/Admin/ClassSchedules/GetAvailableTrainers?startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}&classId=${currentClassId}`;
-
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (!data.success) {
-                    trainerSelect.innerHTML = '<option value="">-- No available trainers --</option>';
-                    trainerMessageDiv.textContent = data.message;
-                    return;
-                }
-
-                if (data.trainers.length === 0) {
-                    trainerSelect.innerHTML = '<option value="">-- No available trainers in this time range --</option>';
-                    trainerMessageDiv.textContent = "All trainers are already assigned during this time range.";
-                    return;
-                }
-
-                trainerSelect.innerHTML = '<option value="">-- Select Trainer --</option>';
-
-                data.trainers.forEach(trainer => {
-                    const option = document.createElement("option");
-                    option.value = trainer.trainerId;
-                    option.textContent = trainer.fullName;
-
-                    if (trainer.trainerId.toString() === currentTrainerId) {
-                        option.selected = true;
-                    }
-
-                    trainerSelect.appendChild(option);
-                });
-            }
 
             async function loadAvailableRooms() {
                 const startTime = startInput.value;
@@ -174,7 +125,6 @@
 
             function loadAvailableResources() {
                 if (endInput.value && new Date(endInput.value) <= new Date()) return;
-                loadAvailableTrainers();
                 loadAvailableRooms();
             }
 

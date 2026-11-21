@@ -32,24 +32,6 @@ namespace SmartGymManagement.Areas.Admin.Controllers
             return View(rooms);
         }
 
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var room = await _context.Rooms
-                .FirstOrDefaultAsync(r => r.RoomId == id);
-
-            if (room == null)
-            {
-                return NotFound();
-            }
-
-            return View(room);
-        }
-
         public IActionResult Create()
         {
             return View();

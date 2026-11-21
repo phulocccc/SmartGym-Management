@@ -23,6 +23,13 @@
     </div>
 
     <div class="form-group mb-3">
+        <label asp-for="Password" class="control-label">Initial Password</label>
+        <input asp-for="Password" class="form-control" autocomplete="new-password" />
+        <small class="text-muted">Tối thiểu 10 ký tự, có chữ số và chữ thường.</small>
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
         <label asp-for="PhoneNumber" class="control-label">Phone Number</label>
         <input asp-for="PhoneNumber" class="form-control" />
         <span asp-validation-for="PhoneNumber" class="text-danger"></span>

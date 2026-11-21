@@ -44,8 +44,7 @@ builder.Services.AddRateLimiter(options =>
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
     {
         var path = context.Request.Path;
-        if (path.StartsWithSegments("/Identity/Account/Login") || path.StartsWithSegments("/Identity/Account/Register") ||
-            path.StartsWithSegments("/AccountSetup"))
+        if (path.StartsWithSegments("/Identity/Account/Login") || path.StartsWithSegments("/Identity/Account/Register"))
             return RateLimitPartition.GetFixedWindowLimiter("accounts:" + (context.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 });
         return RateLimitPartition.GetNoLimiter("other");

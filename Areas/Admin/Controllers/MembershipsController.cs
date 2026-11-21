@@ -318,29 +318,6 @@ namespace SmartGymManagement.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> ConfirmRefund(int id, string? reference)
-        {
-            if (string.IsNullOrWhiteSpace(reference) || reference.Length > 100) return BadRequest("Cần mã biên nhận hoàn tiền.");
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-            await _reservations.LockAsync();
-            var membership = await _context.Memberships.FindAsync(id);
-            if (membership == null) return NotFound();
-            if (membership.Status != MembershipStatus.Cancelled) return BadRequest("Chỉ hoàn tiền cho gói đã hủy.");
-            var payments = await _context.PaymentTransactions.Where(p => p.MembershipId == id && p.Status == PaymentStatus.Paid).ToListAsync();
-            if (payments.Count == 0) return BadRequest("Không có giao dịch đã thu để hoàn tiền.");
-            foreach (var payment in payments)
-            {
-                payment.Status = PaymentStatus.Refunded;
-                payment.RefundedAt = GymClock.Now;
-                payment.Note = "Đã xác nhận hoàn toàn bộ tiền: " + reference.Trim();
-            }
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            TempData["SuccessMessage"] = "Đã ghi nhận hoàn tiền. Thao tác này không tự chuyển tiền qua ngân hàng.";
-            return RedirectToAction(nameof(Details), new { id });
-        }
-
         private async Task LoadDropdownsAsync(int? selectedMemberId = null, int? selectedPackageId = null)
         {
             var members = await _context.Members

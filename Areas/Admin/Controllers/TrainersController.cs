@@ -36,25 +36,6 @@ namespace SmartGymManagement.Areas.Admin.Controllers
             return View(trainers);
         }
 
-        // GET: Admin/Trainers/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var trainer = await _context.Trainers
-                .FirstOrDefaultAsync(t => t.TrainerId == id);
-
-            if (trainer == null)
-            {
-                return NotFound();
-            }
-
-            return View(trainer);
-        }
-
         // GET: Admin/Trainers/Create
         public IActionResult Create()
         {

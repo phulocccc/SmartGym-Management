@@ -312,28 +312,6 @@ namespace SmartGymManagement.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Delete(int id)
-        {
-            var member = await GetCurrentMemberAsync();
-            if (member == null) return NotFound();
-            var record = await _context.BMIRecords.SingleOrDefaultAsync(b => b.BMIRecordId == id && b.MemberId == member.MemberId);
-            return record == null ? NotFound() : View(record);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var member = await GetCurrentMemberAsync();
-            if (member == null) return NotFound();
-            var record = await _context.BMIRecords.SingleOrDefaultAsync(b => b.BMIRecordId == id && b.MemberId == member.MemberId);
-            if (record == null) return NotFound();
-            _context.BMIRecords.Remove(record);
-            await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Đã xóa bản đánh giá.";
-            return RedirectToAction(nameof(Index));
-        }
-
         private async Task<Member?> GetCurrentMemberAsync()
         {
             var user = await _userManager.GetUserAsync(User);

@@ -223,3 +223,26 @@
         }
     </div>
 </div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Thông báo gần đây</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.RecentNotifications.Any())
+        {
+            @foreach (var notification in Model.RecentNotifications)
+            {
+                <div class="border-bottom py-2">
+                    <strong>@notification.Title</strong>
+                    <p class="mb-1">@notification.Message</p>
+                    <small class="text-muted">@notification.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted mb-0">Chưa có thông báo.</p>
+        }
+    </div>
+</div>
