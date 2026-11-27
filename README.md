@@ -103,7 +103,33 @@ dotnet ef database update
 dotnet run
 ```
 
-Open the local address printed in your terminal. Some features require an authenticated user with the appropriate role; additional local setup or seed data may be necessary.
+Open the local address printed in your terminal (by default `https://localhost:7063`).
+
+### Demo accounts (for assessment)
+
+A fresh database contains no user accounts. The application includes a demo data seeder (`Data/DbSeeder.cs`) that creates an administrator, three members, trainers, rooms, membership packages, class schedules, bookings, attendance records and fitness data. For security, the seeder is disabled by default and the demo passwords are not stored in the source code; they are supplied through .NET User Secrets.
+
+Run the following commands **once**, from the project folder (the folder containing `SmartGymManagement.csproj`), before `dotnet run`:
+
+```bash
+dotnet user-secrets set "SeedData:Enabled" "true"
+dotnet user-secrets set "SeedData:AdminPassword" "AdminDemo2026"
+dotnet user-secrets set "SeedData:MemberPassword" "MemberDemo2026"
+
+dotnet ef database update
+dotnet run
+```
+
+The passwords above are suggested demo values; any password of at least 10 characters containing a lowercase letter and a digit is accepted. The seeder runs at start-up in the Development environment and skips records that already exist, so restarting the application is safe.
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@smartgym.com` | the value set for `SeedData:AdminPassword` |
+| Member | `linh.member@smartgym.com` | the value set for `SeedData:MemberPassword` |
+| Member | `minh.member@smartgym.com` | the value set for `SeedData:MemberPassword` |
+| Member | `huy.member@smartgym.com` | the value set for `SeedData:MemberPassword` |
+
+New member accounts can also be created through the **Register** page. The QR check-in camera on the admin Check-in page requires a browser that supports the BarcodeDetector API (for example, Chrome or Edge); a paste-code fallback is provided otherwise.
 
 ## Development Notes
 
